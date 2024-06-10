@@ -9,8 +9,7 @@ class AnalysisUtils:
     
     def analyze_income_stmt(
         ticker_symbol: Annotated[str, "ticker symbol"],
-        # fyear: Annotated[str, "fiscal year of the 10-K report"],
-        save_path: Annotated[str, "txt file path, to which the returned instruction & resources are written."]
+        fyear: Annotated[str, "fiscal year of the 10-K report"],
     ) -> str:
         """
         Retrieve the income statement for the given ticker symbol with the related section of its 10-K report.
@@ -38,7 +37,14 @@ class AnalysisUtils:
 
         # Retrieve the related section from the 10-K report
         finnhub_client = FinnhubUtils()
-        thicker_sec_filing = finnhub_client.get_sec_filing(ticker_symbol, save_path=f"../outputs/{ticker_symbol}/latest_sec_filing.htm")
+        sec_filing_params = {
+            "symbol": ticker_symbol,
+            }
+        if fyear: 
+            sec_filing_params['from_date'] = f"{fyear}-01-01"
+            sec_filing_params['to_date'] = f"{fyear}-12-31"
+
+        thicker_sec_filing = finnhub_client.get_sec_filing(**sec_filing_params)
 
         # Combine the instruction, section text, and income statement
         prompt = dedent(

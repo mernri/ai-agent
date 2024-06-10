@@ -11,12 +11,11 @@ class YFinanceUtils:
         self.yfinance_ticker = self.init_yfinance_client(symbol)
     
     def init_yfinance_client(self, symbol: str) -> Any:
-        """Initializes the yfinance client for a given symbol."""
         ticker = yf.Ticker(symbol)
         return ticker
     
     def get_income_stmt(self) -> DataFrame:
-        """Fetches and returns the income statement of the company as a DataFrame."""
+        """Retrieve the latest income statement for the stock defined by the initialized ticker symbol."""
         income_stmt = self.yfinance_ticker.financials
         income_stmt_df = pd.DataFrame(income_stmt)
         save_output(income_stmt_df, f"Income statement for: {symbol}", path_constructor(symbol, "income_statement", 'csv'))

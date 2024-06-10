@@ -32,9 +32,8 @@ class SecApiUtils:
             "URL of the 10-K report, if not specified, will get report url from fmp api",
         ] = None,
     ) -> str:
-        """
-        Get a specific section of a 10-K report from the SEC API.
-        """
+        """Retrieve and save a specified section from a company's 10-K report for a given fiscal year using the ticker symbol."""
+
         if isinstance(section, int):
             section = str(section)
         if section not in [
