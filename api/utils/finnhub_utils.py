@@ -156,7 +156,7 @@ class FinnhubUtils:
                         from_date: Annotated[str, "From date, format yyyy-mm-dd"] = today(12), 
                         to_date: Annotated[str, "To date, format yyyy-mm-dd"] = today(),
                         save_path: SavePathType = None,
-                        ) -> pd.DataFrame:
+                        ) -> str:
         
         
         params = {
@@ -188,7 +188,7 @@ if __name__ == "__main__":
     # basic_fin = fin.get_basic_financials(symbol, None, f"../outputs/{symbol}/basic_financials.csv")
     # company_news = fin.get_company_news("company", symbol, "2024-01-01", "2024-10-02", 10, f"../outputs/{symbol}/company_news.csv")
     # financial_hist = fin.get_basic_financials_history(symbol, "annual", "2020-01-01", "2021-01-01", None, f"../outputs/{symbol}/financial_hist.csv")
-sec_filing = fin.get_sec_filing(symbol=symbol, save_path=f"../outputs/{symbol}/latest_sec_filing.htm")
+    # sec_filing = fin.get_sec_filing(symbol=symbol, save_path=f"../outputs/{symbol}/latest_sec_filing.htm")
     
     # print("\nCompany Profile", company_profile)
     # print("\nBasic Financials", basic_fin)

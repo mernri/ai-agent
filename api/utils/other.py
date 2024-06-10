@@ -22,7 +22,7 @@ def save_output(data: pd.DataFrame, tag: str, save_path: SavePathType = None) ->
     if save_path:
         full_path = get_output_path(save_path)
         ensure_directory_exists(os.path.dirname(full_path))
-        data.to_csv(full_path, index=False)
+        data.to_csv(full_path)
         print(f"{tag} saved to {full_path}")
         
 def save_htm(url, tag: str, save_path):
