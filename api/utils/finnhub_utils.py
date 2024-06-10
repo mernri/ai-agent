@@ -7,9 +7,10 @@ from collections import defaultdict
 import finnhub
 from dotenv import load_dotenv
 import sys
-from utils.other import save_output, SavePathType
-load_dotenv("../.env")
+from utils.other import save_output, save_htm, SavePathType, today
+load_dotenv(".env")
 
+## FINNHUB API DOCUMENTATION: https://finnhub.io/docs/api
 class FinnhubUtils:
     def __init__(self):
         self.finnhub_client = self.init_finnhub_client()
@@ -19,7 +20,7 @@ class FinnhubUtils:
             raise Exception("Missing FINNHUB_API_KEY in .env")
         else:
             finnhub_client = finnhub.Client(api_key=os.environ.get("FINNHUB_API_KEY"))
-            print("\nSuccessfully initialized Finnhub client!")
+            print("\nSuccessfully initialized Finnhub client!\n")
             return finnhub_client
 
     def get_company_profile(self, symbol: Annotated[str, "ticker symbol"]) -> str:
@@ -29,7 +30,7 @@ class FinnhubUtils:
             return f"\nFailed to find company profile for symbol {symbol} from finnhub!"
 
         formatted_str = (
-            "[Company Introduction]:\n\n{name} is a leading entity in the {finnhubIndustry} sector. "
+            "[Company Introduction]:\n\n{name} is a leading entity in the {finnhubIndustry} sector based in {country}. "
             "Incorporated and publicly traded since {ipo}, the company has established its reputation as "
             "one of the key players in the market. As of today, {name} has a market capitalization "
             "of {marketCapitalization:.2f} in {currency}, with {shareOutstanding:.2f} shares outstanding."
@@ -39,7 +40,6 @@ class FinnhubUtils:
         ).format(**profile)
 
         return formatted_str
-
 
     def get_company_news(
         self,
@@ -150,6 +150,31 @@ class FinnhubUtils:
 
         return json.dumps(output_dict, indent=2)
 
+    def get_sec_filing(self,
+                        symbol: Annotated[str, "ticker symbol"], 
+                        form: Annotated[str, "Form type from the list : '10-k', '10-q', '8-k'.. "] = "10-K", 
+                        from_date: Annotated[str, "From date, format yyyy-mm-dd"] = today(12), 
+                        to_date: Annotated[str, "To date, format yyyy-mm-dd"] = today(),
+                        save_path: SavePathType = None,
+                        ) -> pd.DataFrame:
+        
+        
+        params = {
+            'symbol': symbol,
+            'form': form,
+            '_from': from_date,
+            'to': to_date
+        }
+        
+        filings = self.finnhub_client.filings(**params)
+            
+        if filings:   
+            latest_filing = max(filings, key=lambda x: x['filedDate'])
+            save_htm(latest_filing['reportUrl'], 'latest sec filling', save_path)
+            return json.dumps(latest_filing, indent=2)
+        else:
+            print("No filings found for the provided criteria.")
+            return {}
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
@@ -159,12 +184,14 @@ if __name__ == "__main__":
     symbol = sys.argv[1]
     fin = FinnhubUtils()
 
-    company_profile = fin.get_company_profile(symbol)    
-    basic_fin = fin.get_basic_financials(symbol, None, f"../outputs/{symbol}/basic_financials.csv")
-    company_news = fin.get_company_news("company", symbol, "2024-01-01", "2024-10-02", 10, f"../outputs/{symbol}/company_news.csv")
-    financial_hist = fin.get_basic_financials_history(symbol, "annual", "2020-01-01", "2021-01-01", None, f"../outputs/{symbol}/financial_hist.csv")
-
+    # company_profile = fin.get_company_profile(symbol)    
+    # basic_fin = fin.get_basic_financials(symbol, None, f"../outputs/{symbol}/basic_financials.csv")
+    # company_news = fin.get_company_news("company", symbol, "2024-01-01", "2024-10-02", 10, f"../outputs/{symbol}/company_news.csv")
+    # financial_hist = fin.get_basic_financials_history(symbol, "annual", "2020-01-01", "2021-01-01", None, f"../outputs/{symbol}/financial_hist.csv")
+sec_filing = fin.get_sec_filing(symbol=symbol, save_path=f"../outputs/{symbol}/latest_sec_filing.htm")
+    
     # print("\nCompany Profile", company_profile)
     # print("\nBasic Financials", basic_fin)
     # print("\nCompany News", company_news)
     # print("\nFinancial History", financial_hist)
+    # print("\nLatest SEC 10k Filing", sec_filing)

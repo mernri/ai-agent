@@ -5,3 +5,4 @@ sec_api
 
 # others libraries
 python-dotenv
+requests
