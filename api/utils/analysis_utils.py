@@ -1,7 +1,7 @@
 
-from typing import Annotated, Any
-from utils.yfinance_utils import YFinanceUtils
-from utils.finnhub_utils import FinnhubUtils
+from typing import Annotated
+from api.utils.data_sources.yfinance_utils import YFinanceUtils
+from api.utils.data_sources.finnhub_utils import FinnhubUtils
 from textwrap import dedent
 from utils.other import save_instruction_prompt
 

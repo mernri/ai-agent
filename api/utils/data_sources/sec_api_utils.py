@@ -2,9 +2,9 @@ import os
 from typing import Annotated
 from dotenv import load_dotenv
 import sys
-from utils.other import  SavePathType,  save_sec_filing_section, path_constructor
+from utils.other import   save_sec_filing_section, path_constructor
 from sec_api import ExtractorApi
-from utils.finnhub_utils import FinnhubUtils
+from api.utils.data_sources.finnhub_utils import FinnhubUtils
 load_dotenv(".env")
 
 class SecApiUtils:
