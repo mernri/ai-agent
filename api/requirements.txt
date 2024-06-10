@@ -1,0 +1,7 @@
+# financial libraries
+finnhub-python
+yfinance
+sec_api
+
+# others libraries
+python-dotenv
