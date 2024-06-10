@@ -42,3 +42,26 @@ def save_htm(url, tag: str, save_path):
         print(f"Report {tag} saved to {full_path}")
     else:
         print(f"Failed to download the report {tag}")
+
+def save_instruction_prompt(prompt: str, save_path: SavePathType = None) -> None:
+    if save_path:
+        full_path = get_output_path(save_path)
+        ensure_directory_exists(os.path.dirname(full_path))
+        with open(full_path, 'w', encoding='utf-8') as file:
+            file.write(prompt)
+        print(f"Instruction prompt saved to {full_path}")
+    
+def save_sec_filing_section(section_content: str, save_path: SavePathType = None) -> None:
+    if save_path:
+        full_path = get_output_path(save_path)
+        ensure_directory_exists(os.path.dirname(full_path))
+        with open(full_path, 'w', encoding='utf-8') as file:
+            file.write(section_content)
+        print(f"Sec filing section content saved to {full_path}")
+        
+        
+def path_constructor(symbol: str, output: str, extension: str) -> str:
+    """
+    Construct the path for the given ouput and thicker symbol.
+    """
+    return f"../outputs/{symbol}/{output}.{extension}"

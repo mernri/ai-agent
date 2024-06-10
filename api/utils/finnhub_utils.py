@@ -7,7 +7,7 @@ from collections import defaultdict
 import finnhub
 from dotenv import load_dotenv
 import sys
-from utils.other import save_output, save_htm, SavePathType, today
+from utils.other import save_output, save_htm, SavePathType, today, path_constructor
 load_dotenv(".env")
 
 ## FINNHUB API DOCUMENTATION: https://finnhub.io/docs/api
@@ -56,15 +56,17 @@ class FinnhubUtils:
             max_news_num: Annotated[
                 int, "maximum number of news to return, default to 10"
             ] = 10,
-            save_path: SavePathType = None,
         ) -> pd.DataFrame:
             news = self.finnhub_client.company_news(symbol, _from=start_date, to=end_date)
             if len(news) == 0:
                 print(f"No company news found for symbol {symbol} from finnhub!")
+                
             news = [
                 {
                     "date": datetime.fromtimestamp(n["datetime"]).strftime("%Y%m%d%H%M%S"),
                     "headline": n["headline"],
+                    "url": n["url"],
+                    "source": n["source"],
                     "summary": n["summary"],
                 }
                 for n in news
@@ -75,7 +77,7 @@ class FinnhubUtils:
                 news = news[:max_news_num]
             news.sort(key=lambda x: x["date"])
             output = pd.DataFrame(news)
-            save_output(output, f"company news of {symbol}", save_path=save_path)
+            save_output(output, f"company news of {symbol}", save_path=path_constructor(symbol, "company_news", "csv"))
 
             return output
 
@@ -89,16 +91,15 @@ class FinnhubUtils:
         start_date: Annotated[
             str,
             "start date of the search period for the company's basic financials, yyyy-mm-dd",
-        ],
+        ] = today(36),
         end_date: Annotated[
             str,
             "end date of the search period for the company's basic financials, yyyy-mm-dd",
-        ],
+        ] = today(),
         selected_columns: Annotated[
             list[str] | None,
             "List of column names of news to return, should be chosen from 'assetTurnoverTTM', 'bookValue', 'cashRatio', 'currentRatio', 'ebitPerShare', 'eps', 'ev', 'fcfMargin', 'fcfPerShareTTM', 'grossMargin', 'inventoryTurnoverTTM', 'longtermDebtTotalAsset', 'longtermDebtTotalCapital', 'longtermDebtTotalEquity', 'netDebtToTotalCapital', 'netDebtToTotalEquity', 'netMargin', 'operatingMargin', 'payoutRatioTTM', 'pb', 'peTTM', 'pfcfTTM', 'pretaxMargin', 'psTTM', 'ptbv', 'quickRatio', 'receivablesTurnoverTTM', 'roaTTM', 'roeTTM', 'roicTTM', 'rotcTTM', 'salesPerShare', 'sgaToSale', 'tangibleBookValue', 'totalDebtToEquity', 'totalDebtToTotalAsset', 'totalDebtToTotalCapital', 'totalRatio'",
         ] = None,
-        save_path: SavePathType = None,
     ) -> pd.DataFrame:
 
         if freq not in ["annual", "quarterly"]:
@@ -118,7 +119,7 @@ class FinnhubUtils:
 
         financials_output = pd.DataFrame(output_dict)
         financials_output = financials_output.rename_axis(index="date")
-        save_output(financials_output, "basic financials", save_path=save_path)
+        save_output(financials_output, "basic financials history", save_path=path_constructor(symbol, "financials_hist", "csv"))
 
         return financials_output
 
@@ -129,7 +130,6 @@ class FinnhubUtils:
             list[str] | None,
             "List of column names of news to return, should be chosen from 'assetTurnoverTTM', 'bookValue', 'cashRatio', 'currentRatio', 'ebitPerShare', 'eps', 'ev', 'fcfMargin', 'fcfPerShareTTM', 'grossMargin', 'inventoryTurnoverTTM', 'longtermDebtTotalAsset', 'longtermDebtTotalCapital', 'longtermDebtTotalEquity', 'netDebtToTotalCapital', 'netDebtToTotalEquity', 'netMargin', 'operatingMargin', 'payoutRatioTTM', 'pb', 'peTTM', 'pfcfTTM', 'pretaxMargin', 'psTTM', 'ptbv', 'quickRatio', 'receivablesTurnoverTTM', 'roaTTM', 'roeTTM', 'roicTTM', 'rotcTTM', 'salesPerShare', 'sgaToSale', 'tangibleBookValue', 'totalDebtToEquity', 'totalDebtToTotalAsset', 'totalDebtToTotalCapital', 'totalRatio','10DayAverageTradingVolume', '13WeekPriceReturnDaily', '26WeekPriceReturnDaily', '3MonthADReturnStd', '3MonthAverageTradingVolume', '52WeekHigh', '52WeekHighDate', '52WeekLow', '52WeekLowDate', '52WeekPriceReturnDaily', '5DayPriceReturnDaily', 'assetTurnoverAnnual', 'assetTurnoverTTM', 'beta', 'bookValuePerShareAnnual', 'bookValuePerShareQuarterly', 'bookValueShareGrowth5Y', 'capexCagr5Y', 'cashFlowPerShareAnnual', 'cashFlowPerShareQuarterly', 'cashFlowPerShareTTM', 'cashPerSharePerShareAnnual', 'cashPerSharePerShareQuarterly', 'currentDividendYieldTTM', 'currentEv/freeCashFlowAnnual', 'currentEv/freeCashFlowTTM', 'currentRatioAnnual', 'currentRatioQuarterly', 'dividendGrowthRate5Y', 'dividendPerShareAnnual', 'dividendPerShareTTM', 'dividendYieldIndicatedAnnual', 'ebitdPerShareAnnual', 'ebitdPerShareTTM', 'ebitdaCagr5Y', 'ebitdaInterimCagr5Y', 'enterpriseValue', 'epsAnnual', 'epsBasicExclExtraItemsAnnual', 'epsBasicExclExtraItemsTTM', 'epsExclExtraItemsAnnual', 'epsExclExtraItemsTTM', 'epsGrowth3Y', 'epsGrowth5Y', 'epsGrowthQuarterlyYoy', 'epsGrowthTTMYoy', 'epsInclExtraItemsAnnual', 'epsInclExtraItemsTTM', 'epsNormalizedAnnual', 'epsTTM', 'focfCagr5Y', 'grossMargin5Y', 'grossMarginAnnual', 'grossMarginTTM', 'inventoryTurnoverAnnual', 'inventoryTurnoverTTM', 'longTermDebt/equityAnnual', 'longTermDebt/equityQuarterly', 'marketCapitalization', 'monthToDatePriceReturnDaily', 'netIncomeEmployeeAnnual', 'netIncomeEmployeeTTM', 'netInterestCoverageAnnual', 'netInterestCoverageTTM', 'netMarginGrowth5Y', 'netProfitMargin5Y', 'netProfitMarginAnnual', 'netProfitMarginTTM', 'operatingMargin5Y', 'operatingMarginAnnual', 'operatingMarginTTM', 'payoutRatioAnnual', 'payoutRatioTTM', 'pbAnnual', 'pbQuarterly', 'pcfShareAnnual', 'pcfShareTTM', 'peAnnual', 'peBasicExclExtraTTM', 'peExclExtraAnnual', 'peExclExtraTTM', 'peInclExtraTTM', 'peNormalizedAnnual', 'peTTM', 'pfcfShareAnnual', 'pfcfShareTTM', 'pretaxMargin5Y', 'pretaxMarginAnnual', 'pretaxMarginTTM', 'priceRelativeToS&P50013Week', 'priceRelativeToS&P50026Week', 'priceRelativeToS&P5004Week', 'priceRelativeToS&P50052Week', 'priceRelativeToS&P500Ytd', 'psAnnual', 'psTTM', 'ptbvAnnual', 'ptbvQuarterly', 'quickRatioAnnual', 'quickRatioQuarterly', 'receivablesTurnoverAnnual', 'receivablesTurnoverTTM', 'revenueEmployeeAnnual', 'revenueEmployeeTTM', 'revenueGrowth3Y', 'revenueGrowth5Y', 'revenueGrowthQuarterlyYoy', 'revenueGrowthTTMYoy', 'revenuePerShareAnnual', 'revenuePerShareTTM', 'revenueShareGrowth5Y', 'roa5Y', 'roaRfy', 'roaTTM', 'roe5Y', 'roeRfy', 'roeTTM', 'roi5Y', 'roiAnnual', 'roiTTM', 'tangibleBookValuePerShareAnnual', 'tangibleBookValuePerShareQuarterly', 'tbvCagr5Y', 'totalDebt/totalEquityAnnual', 'totalDebt/totalEquityQuarterly', 'yearToDatePriceReturnDaily'",
         ] = None,
-        save_path: SavePathType = None,
     ) -> str:
 
         basic_financials = self.finnhub_client.company_basic_financials(symbol, "all")
@@ -146,7 +146,7 @@ class FinnhubUtils:
                 output_dict.pop(k)
         
         output_dict_df = pd.DataFrame(output_dict, index=[0])
-        save_output(output_dict_df, "basic financials", save_path=save_path)
+        save_output(output_dict_df, "basic financials", save_path=path_constructor(symbol, "basic_financials", "csv"))
 
         return json.dumps(output_dict, indent=2)
 
@@ -155,7 +155,6 @@ class FinnhubUtils:
                         form: Annotated[str, "Form type from the list : '10-k', '10-q', '8-k'.. "] = "10-K", 
                         from_date: Annotated[str, "From date, format yyyy-mm-dd"] = today(12), 
                         to_date: Annotated[str, "To date, format yyyy-mm-dd"] = today(),
-                        save_path: SavePathType = None,
                         ) -> str:
         
         
@@ -167,11 +166,11 @@ class FinnhubUtils:
         }
         
         filings = self.finnhub_client.filings(**params)
-            
+                    
         if filings:   
             latest_filing = max(filings, key=lambda x: x['filedDate'])
-            save_htm(latest_filing['reportUrl'], 'latest sec filling', save_path)
-            return json.dumps(latest_filing, indent=2)
+            save_htm(latest_filing['reportUrl'], 'sec filling', path_constructor(symbol, "sec_filing", "htm"))
+            return latest_filing
         else:
             print("No filings found for the provided criteria.")
             return {}
@@ -184,14 +183,14 @@ if __name__ == "__main__":
     symbol = sys.argv[1]
     fin = FinnhubUtils()
 
-    # company_profile = fin.get_company_profile(symbol)    
-    # basic_fin = fin.get_basic_financials(symbol, None, f"../outputs/{symbol}/basic_financials.csv")
-    # company_news = fin.get_company_news("company", symbol, "2024-01-01", "2024-10-02", 10, f"../outputs/{symbol}/company_news.csv")
-    # financial_hist = fin.get_basic_financials_history(symbol, "annual", "2020-01-01", "2021-01-01", None, f"../outputs/{symbol}/financial_hist.csv")
-    # sec_filing = fin.get_sec_filing(symbol=symbol, save_path=f"../outputs/{symbol}/latest_sec_filing.htm")
+    company_profile = fin.get_company_profile(symbol)    
+    basic_fin = fin.get_basic_financials(symbol)
+    company_news = fin.get_company_news("company", symbol, "2024-01-01", "2024-10-02", 10)
+    financial_hist = fin.get_basic_financials_history(symbol, "annual")
+    sec_filing = fin.get_sec_filing(symbol)
     
-    # print("\nCompany Profile", company_profile)
-    # print("\nBasic Financials", basic_fin)
-    # print("\nCompany News", company_news)
-    # print("\nFinancial History", financial_hist)
-    # print("\nLatest SEC 10k Filing", sec_filing)
+    # print("\n\nCompany Profile", company_profile)
+    # print("\n\nBasic Financials", basic_fin)
+    # print("\n\nCompany News", company_news)
+    # print("\n\nFinancial History", financial_hist)
+    # print("\n\nLatest SEC 10k Filing", sec_filing)
