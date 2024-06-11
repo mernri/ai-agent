@@ -7,7 +7,7 @@ from collections import defaultdict
 import finnhub
 from dotenv import load_dotenv
 import sys
-from other import save_output, save_htm, today, path_constructor
+from utils.other import save_output, save_htm, today, path_constructor
 
 load_dotenv("../.env")
 
