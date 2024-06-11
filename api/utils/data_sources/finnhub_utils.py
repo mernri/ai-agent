@@ -37,7 +37,7 @@ class FinnhubUtils:
             "[Company Introduction]:\n\n{name} is a leading entity in the {finnhubIndustry} sector based in {country}. "
             "Incorporated and publicly traded since {ipo}, the company has established its reputation as "
             "one of the key players in the market. As of today, {name} has a market capitalization "
-            "of {marketCapitalization:.2f} in {currency}, with {shareOutstanding:.2f} shares outstanding."
+            "of {marketCapitalization:,.2f} millions in {currency}, with {shareOutstanding:.2f} shares outstanding."
             "\n\n{name} operates primarily in the {country}, trading under the ticker {ticker} on the {exchange}. "
             "As a dominant force in the {finnhubIndustry} space, the company continues to innovate and drive "
             "progress within the industry."

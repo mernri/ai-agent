@@ -42,9 +42,6 @@ async def get_income_statement(symbol: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-
-
-
 class SecSectionResponse(BaseModel):
     symbol: str
     section: str

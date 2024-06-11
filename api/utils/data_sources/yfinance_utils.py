@@ -31,4 +31,4 @@ if __name__ == "__main__":
     yfin = YFinanceUtils(symbol)
     
     income_stmt = yfin.get_income_stmt()
-    print(income_stmt)
+    # print(income_stmt)

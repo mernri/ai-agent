@@ -1,7 +1,10 @@
 import {
     IncomeStatementResponse,
     SecSectionResponse,
-    BasicFinancialsResponse
+    BasicFinancialsResponse,
+    CompanyProfileResponse,
+    CompanyNewsResponse,
+    SecFilingResponse
 }
     from "@/lib/tools/tools_types"
 
@@ -62,5 +65,71 @@ export async function fetchBasicFinancials(symbol: string, selectedColumns?: str
     }
 
     const data: BasicFinancialsResponse = await response.json();
+    return data;
+}
+
+
+
+export async function fetchCompanyProfile(symbol: string): Promise<CompanyProfileResponse> {
+    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+    const response = await fetch(`${baseUrl}/api/get_company_profile?symbol=${symbol}`);
+
+    if (!response.ok) {
+        const errorDetails = await response.json();
+        throw new Error(`Error fetching company profile: ${errorDetails.detail}`);
+    }
+
+    const data: CompanyProfileResponse = await response.json();
+    return data;
+}
+
+
+export async function fetchCompanyNews(symbol: string, start_date?: string, end_date?: string, max_news_num: number = 10): Promise<CompanyNewsResponse> {
+    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+    const params = new URLSearchParams({ symbol });
+
+    if (start_date) {
+        params.append('start_date', start_date);
+    }
+
+    if (end_date) {
+        params.append('end_date', end_date);
+    }
+
+    params.append('max_news_num', max_news_num.toString());
+
+    const response = await fetch(`${baseUrl}/api/get_company_news?${params.toString()}`);
+
+    if (!response.ok) {
+        const errorDetails = await response.json();
+        throw new Error(`Error fetching company news: ${errorDetails.detail}`);
+    }
+
+    const data: CompanyNewsResponse = await response.json();
+    return data;
+}
+
+export async function fetchSecFiling(symbol: string, form?: string, fromDate?: string, toDate?: string): Promise<SecFilingResponse> {
+    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+    const params = new URLSearchParams({ symbol });
+
+    if (form) {
+        params.append('form', form);
+    }
+    if (fromDate) {
+        params.append('from_date', fromDate);
+    }
+    if (toDate) {
+        params.append('to_date', toDate);
+    }
+
+    const response = await fetch(`${baseUrl}/api/get_sec_filing?${params.toString()}`);
+
+    if (!response.ok) {
+        const errorDetails = await response.json();
+        throw new Error(`Error fetching SEC filing: ${errorDetails.detail}`);
+    }
+
+    const data: SecFilingResponse = await response.json();
     return data;
 }

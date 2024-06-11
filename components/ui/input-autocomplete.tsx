@@ -22,15 +22,13 @@ const InputSymbolAutocomplete = ({ handleSelectSymbol }: { handleSelectSymbol: a
         setDisplaySymbolsList(false);
     }
 
-    // console.log("\n\n HEEEEEEYYY displaySymbolsList", displaySymbolsList, "\n\n")
-
     return (
         <div className="relative w-full">
             <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onFocus={() => setDisplaySymbolsList(input.length > 0 && stocks.length > 0)}
-                placeholder="Enter company symbol (Ex: AAPL for Apple)"
+                placeholder="company symbol (Ex: AAPL for Apple)"
                 className="w-full"
             />
             {displaySymbolsList && (
