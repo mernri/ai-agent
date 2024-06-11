@@ -34,7 +34,7 @@ class FinnhubUtils:
             return f"\nFailed to find company profile for symbol {symbol} from finnhub!"
 
         formatted_str = (
-            "[Company Introduction]:\n\n{name} is a leading entity in the {finnhubIndustry} sector based in {country}. "
+            "{name} is a leading entity in the {finnhubIndustry} sector based in {country}. "
             "Incorporated and publicly traded since {ipo}, the company has established its reputation as "
             "one of the key players in the market. As of today, {name} has a market capitalization "
             "of {marketCapitalization:,.2f} millions in {currency}, with {shareOutstanding:.2f} shares outstanding."

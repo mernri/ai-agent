@@ -6,6 +6,9 @@ import { CustomTable } from "@/components/ui/custom-table"
 import he from 'he';
 import { formatUglyDate } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { CheckCircleIcon } from "@heroicons/react/20/solid"
+import BlurIn from "@/components/ui/text/blur-in"
+import { BlurInTextWithCollapsible } from "@/components/ui/blurin-text-with-collapsible"
 
 import {
     fetchIncomeStatement,
@@ -108,87 +111,138 @@ export const Header = () => {
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
         if (selectedSymbol) {
-            // handleFetchIncomeStatement(selectedSymbol);
+            handleCompanyProfile(selectedSymbol)
+            handleFetchIncomeStatement(selectedSymbol);
             // handleFetchSecSection(selectedSymbol, "7")
-            // handleBasicFinancials(selectedSymbol, ['revenueTTm', 'debtEquityTTM', 'peRatioTTM',
-            //     'pegRatioTTM', 'priceToBookTTM', 'priceToSalesTTM', 'dividendYieldTTM', 'roeTTM'])
-            // handleCompanyProfile(selectedSymbol)
-            // handleCompanyNews(selectedSymbol)
-            // handleSecFiling(selectedSymbol, "10-K")
+            handleBasicFinancials(selectedSymbol, ['revenueTTm', 'debtEquityTTM', 'peRatioTTM',
+                'pegRatioTTM', 'priceToBookTTM', 'priceToSalesTTM', 'dividendYieldTTM', 'roeTTM'])
+            handleCompanyNews(selectedSymbol)
+            handleSecFiling(selectedSymbol, "10-K")
         }
     };
 
     return (
         <div className="flex flex-col gap-3 w-full">
-            <form onSubmit={handleSubmit} className="flex flex-grow items-center space-x-2">
-                <p className="whitespace-nowrap">Generate a financial report for</p>
+            <form onSubmit={handleSubmit} className="flex flex-grow items-center space-x-2 mb-6">
+                <p className="whitespace-nowrap text-l font-bold">Generate a financial report for</p>
                 <InputSymbolAutocomplete handleSelectSymbol={setSelectedSymbol} />
                 <Button type="submit">Generate</Button>
             </form>
 
-            {error && <div style={{ color: 'red' }}>{error}</div>}
+            {/* {error && <div style={{ color: 'red' }}>{error}</div>} */}
 
-            {/* {incomeStatement && (
-                <div className="w-full max-w-4xl mt-4">
-                    <CustomTable
-                        title={`Income statement for ${selectedSymbol}`}
-                        content_dict={incomeStatement.income_statement}
-                        cols={Object.keys(incomeStatement.income_statement)}
-                        rows={Object.keys(incomeStatement.income_statement[Object.keys(incomeStatement.income_statement)[0]])}
+            {companyProfile && (
+                <BlurInTextWithCollapsible
+                    text={<BlurIn
+                        icon={<CheckCircleIcon width='20' />}
+                        word={`Company profile extracted successfully`}
+                        className="text-sm text-start text-black dark:text-white"
+                    />}
+                    collapsible={<pre className="whitespace-pre-wrap text-justify">{he.decode(companyProfile.company_profile)}</pre>
+                    }
+                />
+            )}
+
+            {incomeStatement && (
+                <div>
+                    <BlurInTextWithCollapsible
+                        text={<BlurIn
+                            icon={<CheckCircleIcon width='20' />}
+                            word={`Retrieved last income statement`}
+                            className="text-sm text-start text-black dark:text-white"
+                        />}
+                        collapsible={<CustomTable
+                            title={`Income statement for ${selectedSymbol}`}
+                            content_dict={incomeStatement.income_statement}
+                            cols={Object.keys(incomeStatement.income_statement)}
+                            rows={Object.keys(incomeStatement.income_statement[Object.keys(incomeStatement.income_statement)[0]])}
+                        />}
                     />
                 </div>
-            )} */}
+            )}
 
-            {/* {secSection && (
-                <pre className="whitespace-pre-wrap text-justify">{he.decode(secSection.section_text)}</pre>
+            {secSection && (
+                <BlurInTextWithCollapsible
+                    text={<BlurIn
+                        icon={<CheckCircleIcon width='20' />}
+                        word={`Retrieved section ${secSection.section} from 10-k sec filing ${secSection.fiscal_year}`}
+                        className="text-sm text-start text-black dark:text-white"
+                    />}
+                    collapsible={<pre className="whitespace-pre-wrap text-justify">{he.decode(secSection.section_text)}</pre>}
+                />
+            )}
 
-            )} */}
+            {basicFinancials && (
+                <BlurInTextWithCollapsible
+                    text={<BlurIn
+                        icon={<CheckCircleIcon width='20' />}
+                        word={`Retrieved last financial metrics`}
+                        className="text-sm text-start text-black dark:text-white"
+                    />}
+                    collapsible={<div className="w-full max-w-4xl mt-4">
+                        <CustomTable
+                            title={`Basic Financials for ${selectedSymbol}`}
+                            content_dict={{ value: basicFinancials.financials }}
+                            cols={["value"]}
+                            rows={Object.keys(basicFinancials.financials)}
+                        />
+                    </div>}
+                />
+            )}
 
-            {/* {basicFinancials && (
-                <div className="w-full max-w-4xl mt-4">
-                    <CustomTable
-                        title={`Basic Financials for ${selectedSymbol}`}
-                        content_dict={{ value: basicFinancials.financials }}
-                        cols={["value"]}
-                        rows={Object.keys(basicFinancials.financials)}
-                    />
-                </div>
-            )} */}
+            {companyNews && (
+                <BlurInTextWithCollapsible
+                    text={<BlurIn
+                        icon={<CheckCircleIcon width='20' />}
+                        word={`Searching for the ${selectedSymbol}'s latest news`}
+                        className="text-sm text-start text-black dark:text-white"
+                    />}
+                    collapsible={<div className="w-full max-w-4xl mt-4 gap-3 flex flex-col">
+                        {companyNews.news.map((news, index) => (
+                            <div key={index} className="p-4 border border-gray-200 rounded-md flex justify-between gap-4 align-start">
+                                <div>
+                                    <h3 className="font-semibold">{news.headline}</h3>
+                                    <p>{news.source} | {formatUglyDate(news.date)}</p>
+                                </div>
+                                <div>
+                                    <Button asChild variant="outline">
+                                        <a href={news.url} target="_blank" >
+                                            read article
+                                        </a>
+                                    </Button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>}
+                />
 
-            {/* {companyProfile && (
-                <pre className="whitespace-pre-wrap text-justify">{he.decode(companyProfile.company_profile)}</pre>
-            )} */}
+            )}
 
-            {/* {companyNews && (
-                <div className="w-full max-w-4xl mt-4">
-                    {companyNews.news.map((news, index) => (
-                        <div key={index} className="p-4 border border-gray-200 rounded-md">
-                            <h3 className="font-semibold">{news.headline}</h3>
-                            <p>s{news.source} | {formatUglyDate(news.date)}</p>
-                            <a href={news.url} target="_blank">{news.url}</a>
+            {secFiling && (
+                <BlurInTextWithCollapsible
+                    text={<BlurIn
+                        icon={<CheckCircleIcon width='20' />}
+                        word={`Fetching ${selectedSymbol}'s latest ${secFiling.filing.form} sec filing`}
+                        className="text-sm text-start text-black dark:text-white"
+                    />}
+                    collapsible={<div className="w-full max-w-4xl mt-4">
+                        <div className="p-4 border border-gray-200 rounded-md flex justify-between gap-4 align-start">
+                            <div>
+                                <h3 className="font-semibold">SEC Filing for {selectedSymbol} - {secFiling.filing.form}</h3>
+                                <p>Accepted on: {secFiling.filing.acceptedDate}</p>
+                                <p>Filed on: {secFiling.filing.filedDate}</p>
+                            </div>
+                            <div>
+                                <Button asChild variant="outline">
+                                    <a href={secFiling.filing.reportUrl} target="_blank" >
+                                        open {secFiling.filing.form} filing
+                                    </a>
+                                </Button>
+                            </div>
                         </div>
-                    ))}
-                </div>
-            )} */}
-
-            {/* {secFiling && (
-                <div className="w-full max-w-4xl mt-4">
-                    <div className="p-4 border border-gray-200 rounded-md flex justify-between">
-                        <div>
-                            <h3 className="font-semibold">SEC Filing for {selectedSymbol} - {secFiling.filing.form}</h3>
-                            <p>Accepted on: {secFiling.filing.acceptedDate}</p>
-                            <p>Filed on: {secFiling.filing.filedDate}</p>
-                        </div>
-                        <div>
-                            <Button asChild variant="outline">
-                                <a href={secFiling.filing.reportUrl} target="_blank" >
-                                    open {secFiling.filing.form} filing
-                                </a>
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            )} */}
+                    </div>}
+                />
+            )}
         </div>
     )
 }
