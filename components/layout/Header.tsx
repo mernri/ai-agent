@@ -3,23 +3,47 @@
 import { Button } from "@/components/ui/button"
 import { FormEvent, useState } from "react"
 import InputSymbolAutocomplete from "@/components/ui/input-autocomplete"
+import { IncomeStatementType, fetchIncomeStatement } from "@/lib/tools/tools_calls"
+import { CustomTable } from "@/components/ui/custom-table"
 
 export const Header = () => {
     const [selectedSymbol, setSelectedSymbol] = useState<string>("")
+    const [incomeStatement, setIncomeStatement] = useState<IncomeStatementType | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
-    const handleGenerateReport = (e: FormEvent<HTMLButtonElement>) => {
-        e.preventDefault()
-        console.log("Generate report for symbol", selectedSymbol)
-    }
+    const handleFetchIncomeStatement = async (symbol: string) => {
+        try {
+            const data = await fetchIncomeStatement(symbol);
+            setIncomeStatement(data);
+            setError(null);
+        } catch (err: any) {
+            setError(err.message);
+            setIncomeStatement(null);
+        }
+    };
+
+    const handleSubmit = (e: FormEvent) => {
+        e.preventDefault();
+        if (selectedSymbol) {
+            handleFetchIncomeStatement(selectedSymbol);
+        }
+    };
 
     return (
-        <div className="flex items-center gap-3 w-full">
-            <p className="whitespace-nowrap">Generate a financial report for</p>
-            <div className="flex flex-grow items-center space-x-2">
+        <div className="flex flex-col gap-3 w-full">
+            <form onSubmit={handleSubmit} className="flex flex-grow items-center space-x-2">
+                <p className="whitespace-nowrap">Generate a financial report for</p>
                 <InputSymbolAutocomplete handleSelectSymbol={setSelectedSymbol} />
-                <Button type="submit" onClick={(e) => handleGenerateReport(e)}>Generate</Button>
-            </div>
+                <Button type="submit">Generate</Button>
+            </form>
 
+            {error && <div style={{ color: 'red' }}>{error}</div>}
+
+            {incomeStatement && (
+                <div className="w-full max-w-4xl mt-4">
+                    <CustomTable title={`Income statement for ${selectedSymbol}`} content_dict={incomeStatement.income_statement} />
+                </div>
+            )}
         </div>
     )
 }

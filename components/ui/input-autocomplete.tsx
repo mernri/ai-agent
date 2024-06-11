@@ -22,6 +22,8 @@ const InputSymbolAutocomplete = ({ handleSelectSymbol }: { handleSelectSymbol: a
         setDisplaySymbolsList(false);
     }
 
+    // console.log("\n\n HEEEEEEYYY displaySymbolsList", displaySymbolsList, "\n\n")
+
     return (
         <div className="relative w-full">
             <Input
