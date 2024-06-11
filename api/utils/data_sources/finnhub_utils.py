@@ -6,10 +6,10 @@ from datetime import datetime
 from collections import defaultdict
 import finnhub
 from dotenv import load_dotenv
-from langchain.agents import tool
 import sys
-from utils.other import save_output, save_htm, today, path_constructor
-load_dotenv(".env")
+from other import save_output, save_htm, today, path_constructor
+
+load_dotenv("../.env")
 
 ## FINNHUB API DOCUMENTATION: https://finnhub.io/docs/api
 class FinnhubUtils:

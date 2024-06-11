@@ -1,11 +1,11 @@
 
 from typing import Annotated
-from api.utils.data_sources.yfinance_utils import YFinanceUtils
-from api.utils.data_sources.finnhub_utils import FinnhubUtils
+from data_sources.yfinance_utils import YFinanceUtils
+from data_sources.finnhub_utils import FinnhubUtils
 from textwrap import dedent
-from utils.other import save_instruction_prompt
+from other import save_instruction_prompt, path_constructor
 
-class AnalysisUtils:
+class AnalysisPromptsUtils:
     
     def analyze_income_stmt(
         ticker_symbol: Annotated[str, "ticker symbol"],
@@ -60,5 +60,5 @@ class AnalysisUtils:
             """
         )
 
-        save_instruction_prompt(prompt, save_path)
+        save_instruction_prompt(prompt, path_constructor(ticker_symbol, "instruction_prompt", 'txt'))
         return prompt

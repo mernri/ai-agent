@@ -3,6 +3,11 @@ finnhub-python
 yfinance
 sec_api
 
+# ai libraries
+openai
+
 # others libraries
 python-dotenv
 requests
+pandas
+

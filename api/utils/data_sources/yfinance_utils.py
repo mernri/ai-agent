@@ -1,9 +1,9 @@
-import yfinance as yf
 import sys
 from typing import Annotated, Any
 from pandas import DataFrame
 import pandas as pd
 from utils.other import save_output, path_constructor
+import yfinance as yf
 
 class YFinanceUtils:
     def __init__(self, symbol: Annotated[str, "ticker symbol"]):
@@ -18,8 +18,9 @@ class YFinanceUtils:
         """Retrieve the latest income statement for the stock defined by the initialized ticker symbol."""
         income_stmt = self.yfinance_ticker.financials
         income_stmt_df = pd.DataFrame(income_stmt)
-        save_output(income_stmt_df, f"Income statement for: {symbol}", path_constructor(symbol, "income_statement", 'csv'))
-        return income_stmt_df
+        income_stmt_dict = income_stmt_df.transpose().to_dict(orient='index')
+        save_output(pd.DataFrame(income_stmt_dict), f"Income statement for: {self.symbol}", path_constructor(self.symbol, "income_statement", 'csv'))
+        return income_stmt_dict
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
