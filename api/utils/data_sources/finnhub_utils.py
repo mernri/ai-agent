@@ -112,8 +112,7 @@ class FinnhubUtils:
         ] = None,
     ) -> pd.DataFrame:
         """Retrieve historical financial data for a company, specified by stock ticker, for chosen financial metrics over time."""
-
-
+        
         if freq not in ["annual", "quarterly"]:
             return f"Invalid reporting frequency {freq}. Please specify either 'annual' or 'quarterly'."
 
@@ -144,7 +143,6 @@ class FinnhubUtils:
         ] = None,
     ) -> str:
         """Get the most recent basic financial data for a company using its stock ticker symbol, with optional specific financial metrics."""
-
 
         basic_financials = self.finnhub_client.company_basic_financials(symbol, "all")
         if not basic_financials["series"]:
