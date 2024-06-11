@@ -41,26 +41,31 @@ class FinnhubUtils:
             "As a dominant force in the {finnhubIndustry} space, the company continues to innovate and drive "
             "progress within the industry."
         ).format(**profile)
-
+    
         return formatted_str
 
     def get_company_news(
         self,
-        entity: Annotated[str, "entity type: company"],
-            symbol: Annotated[str, "ticker symbol"],
-            start_date: Annotated[
-                str,
-                "start date of the search period for the company's basic financials, yyyy-mm-dd",
+        symbol: Annotated[str, "ticker symbol"],
+        start_date: Annotated[
+            str,
+            "start date of the search period for the company's basic financials, yyyy-mm-dd",
             ],
-            end_date: Annotated[
-                str,
-                "end date of the search period for the company's basic financials, yyyy-mm-dd",
+        end_date: Annotated[
+            str,
+            "end date of the search period for the company's basic financials, yyyy-mm-dd",
             ],
-            max_news_num: Annotated[
-                int, "maximum number of news to return, default to 10"
+        max_news_num: Annotated[
+            int, "maximum number of news to return, default to 10"
             ] = 10,
         ) -> pd.DataFrame:
             """Fetch recent news articles about a company based on its stock ticker, within a specified date range."""
+
+            # Use default date values if not provided
+            if start_date is None:
+                start_date = today(1)
+            if end_date is None:
+                end_date = today()
 
             news = self.finnhub_client.company_news(symbol, _from=start_date, to=end_date)
             if len(news) == 0:
@@ -81,10 +86,10 @@ class FinnhubUtils:
             if len(news) > max_news_num:
                 news = news[:max_news_num]
             news.sort(key=lambda x: x["date"])
-            output = pd.DataFrame(news)
-            save_output(output, f"company news of {symbol}", save_path=path_constructor(symbol, "company_news", "csv"))
-
-            return output
+            output_df = pd.DataFrame(news)
+            save_output(output_df, f"company news of {symbol}", save_path=path_constructor(symbol, "company_news", "csv"))
+            
+            return news
 
     def get_basic_financials_history(
         self,

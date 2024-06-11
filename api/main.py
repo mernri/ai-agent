@@ -1,10 +1,15 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import Optional
+from typing import List, Optional
+import json
 from utils.data_sources.yfinance_utils import YFinanceUtils
 from utils.data_sources.sec_api_utils import SecApiUtils
+from utils.data_sources.finnhub_utils import FinnhubUtils
 
 app = FastAPI()
+
+
+
 
 class IncomeStatementResponse(BaseModel):
     symbol: str
@@ -22,6 +27,10 @@ async def get_income_statement(symbol: str):
         return {"symbol": symbol, "income_statement": income_stmt}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+
+
 
 class SecSectionResponse(BaseModel):
     symbol: str
@@ -51,3 +60,99 @@ async def get_10k_section(ticker_symbol: str, section: str, fyear: Optional[str]
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+
+
+
+
+
+finnhub_utils = FinnhubUtils()
+
+class CompanyProfileResponse(BaseModel):
+    symbol: str
+    company_profile: str
+
+@app.get("/api/get_company_profile", response_model=CompanyProfileResponse)
+async def get_company_profile(symbol: str):
+    if not symbol:
+        raise HTTPException(status_code=400, detail="Symbol parameter is required.")
+    
+    try:
+        profile = finnhub_utils.get_company_profile(symbol)
+        return {
+            "symbol": symbol,
+            "company_profile": profile
+            }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+
+
+class CompanyNewsResponse(BaseModel):
+    symbol: str
+    news: List[dict]
+
+@app.get("/api/get_company_news", response_model=CompanyNewsResponse)
+async def get_company_news(symbol: str, start_date: Optional[str] = None, end_date: Optional[str] = None, max_news_num: Optional[int] = 10):
+    if not symbol:
+        raise HTTPException(status_code=400, detail="Symbol parameter is required.")
+    
+    try:
+        news = finnhub_utils.get_company_news(symbol, start_date, end_date, max_news_num)
+        return {"symbol": symbol, "news": news}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+    
+    
+    
+    
+class BasicFinancialsHistoryResponse(BaseModel):
+    symbol: str
+    financials: dict
+
+@app.get("/api/get_basic_financials_history", response_model=BasicFinancialsHistoryResponse)
+async def get_basic_financials_history(symbol: str, freq: str, start_date: Optional[str] = None, end_date: Optional[str] = None, selected_columns: Optional[List[str]] = None):
+    if not symbol or not freq:
+        raise HTTPException(status_code=400, detail="Symbol and freq parameters are required.")
+    
+    try:
+        financials = finnhub_utils.get_basic_financials_history(symbol, freq, start_date, end_date, selected_columns)
+        return {"symbol": symbol, "financials": financials.to_dict(orient='index')}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+class BasicFinancialsResponse(BaseModel):
+    symbol: str
+    financials: dict
+
+@app.get("/api/get_basic_financials", response_model=BasicFinancialsResponse)
+async def get_basic_financials(symbol: str, selected_columns: Optional[List[str]] = None):
+    if not symbol:
+        raise HTTPException(status_code=400, detail="Symbol parameter is required.")
+    
+    try:
+        financials = finnhub_utils.get_basic_financials(symbol, selected_columns)
+        return {"symbol": symbol, "financials": json.loads(financials)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+
+
+
+class SecFilingResponse(BaseModel):
+    symbol: str
+    filing: dict
+
+@app.get("/api/get_sec_filing", response_model=SecFilingResponse)
+async def get_sec_filing(symbol: str, form: Optional[str] = "10-K", from_date: Optional[str] = None, to_date: Optional[str] = None):
+    if not symbol:
+        raise HTTPException(status_code=400, detail="Symbol parameter is required.")
+    
+    try:
+        filing = finnhub_utils.get_sec_filing(symbol, form, from_date, to_date)
+        return {"symbol": symbol, "filing": filing}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
