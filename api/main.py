@@ -71,13 +71,6 @@ async def get_10k_section(ticker_symbol: str, section: str, fyear: Optional[str]
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
-
-
-
-
 
 finnhub_utils = FinnhubUtils()
 
@@ -163,8 +156,6 @@ async def get_basic_financials(symbol: str, selected_columns: Optional[List[str]
 
 
 
-
-
 class SecFilingResponse(BaseModel):
     symbol: str
     filing: dict
@@ -181,3 +172,11 @@ async def get_sec_filing(symbol: str, form: Optional[str] = "10-K", from_date: O
         return {"symbol": symbol, "filing": filing}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+
+
+
