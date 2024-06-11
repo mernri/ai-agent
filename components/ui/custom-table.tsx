@@ -37,28 +37,35 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { format, parseISO, isValid } from "date-fns";
 
 type TwoDimensionalDict = {
     [key: string]: {
-        [metric: string]: number;
+        [metric: string]: number | string;
     };
 };
 
 interface CustomTableProps {
     title: string;
     content_dict: TwoDimensionalDict;
+    rows: string[];
+    cols: string[];
 }
 
-export const CustomTable = ({ title, content_dict }: CustomTableProps) => {
-    const data = React.useMemo(() => {
-        const dates = Object.keys(content_dict);
-        const rows = Object.keys(content_dict[dates[0]]);
+const isDateColumn = (col: string) => {
+    const parsedDate = parseISO(col);
+    return isValid(parsedDate);
+};
 
+export const CustomTable = ({ title, content_dict, rows, cols }: CustomTableProps) => {
+    const data = React.useMemo(() => {
         return rows.map(row => ({
             metric: row,
-            ...dates.reduce((acc, date) => ({ ...acc, [date]: content_dict[date][row] }), {}),
+            ...cols.reduce((acc, col) => ({
+                ...acc, [col]: content_dict[col]?.[row] ?? "-"
+            }), {}),
         }));
-    }, [content_dict]);
+    }, [content_dict, rows, cols]);
 
     const columns = React.useMemo<ColumnDef<any>[]>(
         () => [
@@ -66,16 +73,19 @@ export const CustomTable = ({ title, content_dict }: CustomTableProps) => {
                 accessorKey: "metric",
                 header: "Metric",
             },
-            ...Object.keys(content_dict).map(date => ({
-                accessorKey: date,
-                header: new Date(date).toLocaleDateString(),
-                cell: ({ row }: { row: any }) => {
-                    const value = row.original[date];
-                    return value ? value.toLocaleString() : "-";
-                },
-            })),
+            ...cols.map(col => {
+                const isDate = isDateColumn(col);
+                return {
+                    accessorKey: col,
+                    header: isDate ? format(parseISO(col), "yyyy-MM-dd") : col,
+                    cell: ({ row }: { row: any }) => {
+                        const value = row.original[col];
+                        return typeof value === 'number' ? value.toLocaleString() : (value ?? "-");
+                    },
+                };
+            }),
         ],
-        [content_dict]
+        [cols]
     );
 
     const [sorting, setSorting] = React.useState<SortingState>([]);

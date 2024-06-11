@@ -135,10 +135,11 @@ async def get_basic_financials_history(symbol: str, freq: str, start_date: Optio
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
+
 class BasicFinancialsResponse(BaseModel):
     symbol: str
     financials: dict
-    
     
 
 @app.get("/api/get_basic_financials", response_model=BasicFinancialsResponse)

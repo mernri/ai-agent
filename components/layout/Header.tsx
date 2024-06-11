@@ -8,18 +8,21 @@ import he from 'he';
 
 import {
     fetchIncomeStatement,
-    fetchSecSection
+    fetchSecSection,
+    fetchBasicFinancials
 } from "@/lib/tools/tools_calls"
 
 import {
-    IncomeStatementType,
-    SecSectionResponseType
+    IncomeStatementResponse,
+    SecSectionResponse,
+    BasicFinancialsResponse
 } from "@/lib/tools/tools_types"
 
 export const Header = () => {
     const [selectedSymbol, setSelectedSymbol] = useState<string>("")
-    const [incomeStatement, setIncomeStatement] = useState<IncomeStatementType | null>(null);
-    const [secSection, setSecSection] = useState<SecSectionResponseType | null>(null);
+    const [incomeStatement, setIncomeStatement] = useState<IncomeStatementResponse | null>(null);
+    const [secSection, setSecSection] = useState<SecSectionResponse | null>(null);
+    const [basicFinancials, setBasicFinancials] = useState<BasicFinancialsResponse | null>(null);
     const [error, setError] = useState<string | null>(null);
 
     const handleFetchIncomeStatement = async (symbol: string) => {
@@ -46,13 +49,30 @@ export const Header = () => {
     };
 
 
+    const handleBasicFinancials = async (symbol: string, selectedColumns?: string[]) => {
+        try {
+            const result = await fetchBasicFinancials(symbol, selectedColumns);
+            setBasicFinancials(result);
+            setError(null);
+        } catch (err: any) {
+            setError(err.message);
+            setBasicFinancials(null);
+        }
+    };
+
+
+
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
         if (selectedSymbol) {
             handleFetchIncomeStatement(selectedSymbol);
             handleFetchSecSection(selectedSymbol, "7")
+            handleBasicFinancials(selectedSymbol, ['assetTurnoverTTM', 'debtEquityTTM', 'dividendYieldTTM'
+            ])
         }
     };
+
+    console.log("basicFinancials", basicFinancials)
 
     return (
         <div className="flex flex-col gap-3 w-full">
@@ -66,7 +86,12 @@ export const Header = () => {
 
             {/* {incomeStatement && (
                 <div className="w-full max-w-4xl mt-4">
-                    <CustomTable title={`Income statement for ${selectedSymbol}`} content_dict={incomeStatement.income_statement} />
+                    <CustomTable
+                        title={`Income statement for ${selectedSymbol}`}
+                        content_dict={incomeStatement.income_statement}
+                        cols={Object.keys(incomeStatement.income_statement)}
+                        rows={Object.keys(incomeStatement.income_statement[Object.keys(incomeStatement.income_statement)[0]])}
+                    />
                 </div>
             )} */}
 
@@ -74,6 +99,17 @@ export const Header = () => {
                 <pre className="whitespace-pre-wrap text-justify">{he.decode(secSection.section_text)}</pre>
 
             )} */}
+
+            {basicFinancials && (
+                <div className="w-full max-w-4xl mt-4">
+                    <CustomTable
+                        title={`Basic Financials for ${selectedSymbol}`}
+                        content_dict={{ value: basicFinancials.financials }}
+                        cols={["value"]}
+                        rows={Object.keys(basicFinancials.financials)}
+                    />
+                </div>
+            )}
 
 
         </div>

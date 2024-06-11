@@ -8,6 +8,7 @@ import finnhub
 from dotenv import load_dotenv
 import sys
 from utils.other import save_output, save_htm, today, path_constructor
+from typing import List, Optional
 
 load_dotenv("../.env")
 
@@ -101,31 +102,34 @@ class FinnhubUtils:
         start_date: Annotated[
             str,
             "start date of the search period for the company's basic financials, yyyy-mm-dd",
-        ] = today(36),
+        ] = today(12 * 30),
         end_date: Annotated[
             str,
             "end date of the search period for the company's basic financials, yyyy-mm-dd",
         ] = today(),
         selected_columns: Annotated[
-            list[str] | None,
+            Optional[List[str]],
             "List of column names of news to return, should be chosen from 'assetTurnoverTTM', 'bookValue', 'cashRatio', 'currentRatio', 'ebitPerShare', 'eps', 'ev', 'fcfMargin', 'fcfPerShareTTM', 'grossMargin', 'inventoryTurnoverTTM', 'longtermDebtTotalAsset', 'longtermDebtTotalCapital', 'longtermDebtTotalEquity', 'netDebtToTotalCapital', 'netDebtToTotalEquity', 'netMargin', 'operatingMargin', 'payoutRatioTTM', 'pb', 'peTTM', 'pfcfTTM', 'pretaxMargin', 'psTTM', 'ptbv', 'quickRatio', 'receivablesTurnoverTTM', 'roaTTM', 'roeTTM', 'roicTTM', 'rotcTTM', 'salesPerShare', 'sgaToSale', 'tangibleBookValue', 'totalDebtToEquity', 'totalDebtToTotalAsset', 'totalDebtToTotalCapital', 'totalRatio'",
         ] = None,
     ) -> pd.DataFrame:
         """Retrieve historical financial data for a company, specified by stock ticker, for chosen financial metrics over time."""
         
         if freq not in ["annual", "quarterly"]:
-            return f"Invalid reporting frequency {freq}. Please specify either 'annual' or 'quarterly'."
-
-        basic_financials = self.finnhub_client.company_basic_financials(symbol, "all")
+            raise ValueError(f"Invalid reporting frequency {freq}. Please specify either 'annual' or 'quarterly'.")
+        
+        columns = selected_columns if selected_columns else 'all'
+        
+        basic_financials = self.finnhub_client.company_basic_financials(symbol, columns)
+    
         if not basic_financials["series"]:
-            return f"Failed to find basic financials for symbol {symbol} from finnhub! Try a different symbol."
+            raise ValueError(f"Failed to find basic financials for symbol {symbol} from finnhub! Try a different symbol.")
 
         output_dict = defaultdict(dict)
-        for metric, value_list in basic_financials["series"][freq].items():
+        for metric, value_list in basic_financials["series"].get(freq, {}).items():
             if selected_columns and metric not in selected_columns:
                 continue
             for value in value_list:
-                if value["period"] >= start_date and value["period"] <= end_date:
+                if start_date <= value["period"] <= end_date:
                     output_dict[metric].update({value["period"]: value["v"]})
 
         financials_output = pd.DataFrame(output_dict)
@@ -135,32 +139,34 @@ class FinnhubUtils:
         return financials_output
 
     def get_basic_financials(
-        self,
-        symbol: Annotated[str, "ticker symbol"],
-        selected_columns: Annotated[
-            list[str] | None,
-            "List of column names of news to return, should be chosen from 'assetTurnoverTTM', 'bookValue', 'cashRatio', 'currentRatio', 'ebitPerShare', 'eps', 'ev', 'fcfMargin', 'fcfPerShareTTM', 'grossMargin', 'inventoryTurnoverTTM', 'longtermDebtTotalAsset', 'longtermDebtTotalCapital', 'longtermDebtTotalEquity', 'netDebtToTotalCapital', 'netDebtToTotalEquity', 'netMargin', 'operatingMargin', 'payoutRatioTTM', 'pb', 'peTTM', 'pfcfTTM', 'pretaxMargin', 'psTTM', 'ptbv', 'quickRatio', 'receivablesTurnoverTTM', 'roaTTM', 'roeTTM', 'roicTTM', 'rotcTTM', 'salesPerShare', 'sgaToSale', 'tangibleBookValue', 'totalDebtToEquity', 'totalDebtToTotalAsset', 'totalDebtToTotalCapital', 'totalRatio','10DayAverageTradingVolume', '13WeekPriceReturnDaily', '26WeekPriceReturnDaily', '3MonthADReturnStd', '3MonthAverageTradingVolume', '52WeekHigh', '52WeekHighDate', '52WeekLow', '52WeekLowDate', '52WeekPriceReturnDaily', '5DayPriceReturnDaily', 'assetTurnoverAnnual', 'assetTurnoverTTM', 'beta', 'bookValuePerShareAnnual', 'bookValuePerShareQuarterly', 'bookValueShareGrowth5Y', 'capexCagr5Y', 'cashFlowPerShareAnnual', 'cashFlowPerShareQuarterly', 'cashFlowPerShareTTM', 'cashPerSharePerShareAnnual', 'cashPerSharePerShareQuarterly', 'currentDividendYieldTTM', 'currentEv/freeCashFlowAnnual', 'currentEv/freeCashFlowTTM', 'currentRatioAnnual', 'currentRatioQuarterly', 'dividendGrowthRate5Y', 'dividendPerShareAnnual', 'dividendPerShareTTM', 'dividendYieldIndicatedAnnual', 'ebitdPerShareAnnual', 'ebitdPerShareTTM', 'ebitdaCagr5Y', 'ebitdaInterimCagr5Y', 'enterpriseValue', 'epsAnnual', 'epsBasicExclExtraItemsAnnual', 'epsBasicExclExtraItemsTTM', 'epsExclExtraItemsAnnual', 'epsExclExtraItemsTTM', 'epsGrowth3Y', 'epsGrowth5Y', 'epsGrowthQuarterlyYoy', 'epsGrowthTTMYoy', 'epsInclExtraItemsAnnual', 'epsInclExtraItemsTTM', 'epsNormalizedAnnual', 'epsTTM', 'focfCagr5Y', 'grossMargin5Y', 'grossMarginAnnual', 'grossMarginTTM', 'inventoryTurnoverAnnual', 'inventoryTurnoverTTM', 'longTermDebt/equityAnnual', 'longTermDebt/equityQuarterly', 'marketCapitalization', 'monthToDatePriceReturnDaily', 'netIncomeEmployeeAnnual', 'netIncomeEmployeeTTM', 'netInterestCoverageAnnual', 'netInterestCoverageTTM', 'netMarginGrowth5Y', 'netProfitMargin5Y', 'netProfitMarginAnnual', 'netProfitMarginTTM', 'operatingMargin5Y', 'operatingMarginAnnual', 'operatingMarginTTM', 'payoutRatioAnnual', 'payoutRatioTTM', 'pbAnnual', 'pbQuarterly', 'pcfShareAnnual', 'pcfShareTTM', 'peAnnual', 'peBasicExclExtraTTM', 'peExclExtraAnnual', 'peExclExtraTTM', 'peInclExtraTTM', 'peNormalizedAnnual', 'peTTM', 'pfcfShareAnnual', 'pfcfShareTTM', 'pretaxMargin5Y', 'pretaxMarginAnnual', 'pretaxMarginTTM', 'priceRelativeToS&P50013Week', 'priceRelativeToS&P50026Week', 'priceRelativeToS&P5004Week', 'priceRelativeToS&P50052Week', 'priceRelativeToS&P500Ytd', 'psAnnual', 'psTTM', 'ptbvAnnual', 'ptbvQuarterly', 'quickRatioAnnual', 'quickRatioQuarterly', 'receivablesTurnoverAnnual', 'receivablesTurnoverTTM', 'revenueEmployeeAnnual', 'revenueEmployeeTTM', 'revenueGrowth3Y', 'revenueGrowth5Y', 'revenueGrowthQuarterlyYoy', 'revenueGrowthTTMYoy', 'revenuePerShareAnnual', 'revenuePerShareTTM', 'revenueShareGrowth5Y', 'roa5Y', 'roaRfy', 'roaTTM', 'roe5Y', 'roeRfy', 'roeTTM', 'roi5Y', 'roiAnnual', 'roiTTM', 'tangibleBookValuePerShareAnnual', 'tangibleBookValuePerShareQuarterly', 'tbvCagr5Y', 'totalDebt/totalEquityAnnual', 'totalDebt/totalEquityQuarterly', 'yearToDatePriceReturnDaily'",
-        ] = None,
-    ) -> str:
-        """Get the most recent basic financial data for a company using its stock ticker symbol, with optional specific financial metrics."""
+            self,
+            symbol: Annotated[str, "ticker symbol"],
+            selected_columns: Annotated[
+                Optional[List[str]],
+                "List of column names of news to return, should be chosen from 'assetTurnoverTTM', 'bookValue', 'cashRatio', 'currentRatio', 'ebitPerShare', 'eps', 'ev', 'fcfMargin', 'fcfPerShareTTM', 'grossMargin', 'inventoryTurnoverTTM', 'longtermDebtTotalAsset', 'longtermDebtTotalCapital', 'longtermDebtTotalEquity', 'netDebtToTotalCapital', 'netDebtToTotalEquity', 'netMargin', 'operatingMargin', 'payoutRatioTTM', 'pb', 'peTTM', 'pfcfTTM', 'pretaxMargin', 'psTTM', 'ptbv', 'quickRatio', 'receivablesTurnoverTTM', 'roaTTM', 'roeTTM', 'roicTTM', 'rotcTTM', 'salesPerShare', 'sgaToSale', 'tangibleBookValue', 'totalDebtToEquity', 'totalDebtToTotalAsset', 'totalDebtToTotalCapital', 'totalRatio','10DayAverageTradingVolume', '13WeekPriceReturnDaily', '26WeekPriceReturnDaily', '3MonthADReturnStd', '3MonthAverageTradingVolume', '52WeekHigh', '52WeekHighDate', '52WeekLow', '52WeekLowDate', '52WeekPriceReturnDaily', '5DayPriceReturnDaily', 'assetTurnoverAnnual', 'assetTurnoverTTM', 'beta', 'bookValuePerShareAnnual', 'bookValuePerShareQuarterly', 'bookValueShareGrowth5Y', 'capexCagr5Y', 'cashFlowPerShareAnnual', 'cashFlowPerShareQuarterly', 'cashFlowPerShareTTM', 'cashPerSharePerShareAnnual', 'cashPerSharePerShareQuarterly', 'currentDividendYieldTTM', 'currentEv/freeCashFlowAnnual', 'currentEv/freeCashFlowTTM', 'currentRatioAnnual', 'currentRatioQuarterly', 'dividendGrowthRate5Y', 'dividendPerShareAnnual', 'dividendPerShareTTM', 'dividendYieldIndicatedAnnual', 'ebitdPerShareAnnual', 'ebitdPerShareTTM', 'ebitdaCagr5Y', 'ebitdaInterimCagr5Y', 'enterpriseValue', 'epsAnnual', 'epsBasicExclExtraItemsAnnual', 'epsBasicExclExtraItemsTTM', 'epsExclExtraItemsAnnual', 'epsExclExtraItemsTTM', 'epsGrowth3Y', 'epsGrowth5Y', 'epsGrowthQuarterlyYoy', 'epsGrowthTTMYoy', 'epsInclExtraItemsAnnual', 'epsInclExtraItemsTTM', 'epsNormalizedAnnual', 'epsTTM', 'focfCagr5Y', 'grossMargin5Y', 'grossMarginAnnual', 'grossMarginTTM', 'inventoryTurnoverAnnual', 'inventoryTurnoverTTM', 'longTermDebt/equityAnnual', 'longTermDebt/equityQuarterly', 'marketCapitalization', 'monthToDatePriceReturnDaily', 'netIncomeEmployeeAnnual', 'netIncomeEmployeeTTM', 'netInterestCoverageAnnual', 'netInterestCoverageTTM', 'netMarginGrowth5Y', 'netProfitMargin5Y', 'netProfitMarginAnnual', 'netProfitMarginTTM', 'operatingMargin5Y', 'operatingMarginAnnual', 'operatingMarginTTM', 'payoutRatioAnnual', 'payoutRatioTTM', 'pbAnnual', 'pbQuarterly', 'pcfShareAnnual', 'pcfShareTTM', 'peAnnual', 'peBasicExclExtraTTM', 'peExclExtraAnnual', 'peExclExtraTTM', 'peInclExtraTTM', 'peNormalizedAnnual', 'peTTM', 'pfcfShareAnnual', 'pfcfShareTTM', 'pretaxMargin5Y', 'pretaxMarginAnnual', 'pretaxMarginTTM', 'priceRelativeToS&P50013Week', 'priceRelativeToS&P50026Week', 'priceRelativeToS&P5004Week', 'priceRelativeToS&P50052Week', 'priceRelativeToS&P500Ytd', 'psAnnual', 'psTTM', 'ptbvAnnual', 'ptbvQuarterly', 'quickRatioAnnual', 'quickRatioQuarterly', 'receivablesTurnoverAnnual', 'receivablesTurnoverTTM', 'revenueEmployeeAnnual', 'revenueEmployeeTTM', 'revenueGrowth3Y', 'revenueGrowth5Y', 'revenueGrowthQuarterlyYoy', 'revenueGrowthTTMYoy', 'revenuePerShareAnnual', 'revenuePerShareTTM', 'revenueShareGrowth5Y', 'roa5Y', 'roaRfy', 'roaTTM', 'roe5Y', 'roeRfy', 'roeTTM', 'roi5Y', 'roiAnnual', 'roiTTM', 'tangibleBookValuePerShareAnnual', 'tangibleBookValuePerShareQuarterly', 'tbvCagr5Y', 'totalDebt/totalEquityAnnual', 'totalDebt/totalEquityQuarterly', 'yearToDatePriceReturnDaily'",
+            ] = None,
+        ) -> str:
+            """Get the most recent basic financial data for a company using its stock ticker symbol, with optional specific financial metrics."""
 
-        basic_financials = self.finnhub_client.company_basic_financials(symbol, "all")
-        if not basic_financials["series"]:
-            return f"Failed to find basic financials for symbol {symbol} from finnhub! Try a different symbol."
+            columns = selected_columns if selected_columns else 'all'
 
-        output_dict = basic_financials["metric"]
-        for metric, value_list in basic_financials["series"]["quarterly"].items():
-            value = value_list[0]
-            output_dict.update({metric: value["v"]})
+            basic_financials = self.finnhub_client.company_basic_financials(symbol, columns)
+            if not basic_financials["series"]:
+                return f"Failed to find basic financials for symbol {symbol} from finnhub! Try a different symbol."
 
-        for k in output_dict.keys():
-            if selected_columns and k not in selected_columns:
-                output_dict.pop(k)
-        
-        output_dict_df = pd.DataFrame(output_dict, index=[0])
-        save_output(output_dict_df, "basic financials", save_path=path_constructor(symbol, "basic_financials", "csv"))
+            output_dict = basic_financials["metric"]
+            for metric, value_list in basic_financials["series"]["quarterly"].items():
+                if value_list: 
+                    value = value_list[0]
+                    output_dict.update({metric: value["v"]})
 
-        return json.dumps(output_dict, indent=2)
+            if selected_columns:
+                output_dict = {k: v for k, v in output_dict.items() if k in selected_columns}
+            
+            output_dict_df = pd.DataFrame(output_dict, index=[0])
+            save_output(output_dict_df, "basic financials", save_path=path_constructor(symbol, "basic_financials", "csv"))
+            
+            return json.dumps(output_dict, indent=2)
 
     def get_sec_filing(self,
                         symbol: Annotated[str, "ticker symbol"], 
@@ -195,11 +201,11 @@ if __name__ == "__main__":
     symbol = sys.argv[1]
     fin = FinnhubUtils()
 
-    company_profile = fin.get_company_profile(symbol)    
-    basic_fin = fin.get_basic_financials(symbol)
-    company_news = fin.get_company_news("company", symbol, "2024-01-01", "2024-10-02", 10)
-    financial_hist = fin.get_basic_financials_history(symbol, "annual")
-    sec_filing = fin.get_sec_filing(symbol)
+    # company_profile = fin.get_company_profile(symbol)    
+    # basic_fin = fin.get_basic_financials(symbol)
+    # company_news = fin.get_company_news(symbol, "2024-01-01", "2024-10-02", 10)
+    # financial_hist = fin.get_basic_financials_history(symbol, "annual")
+    # sec_filing = fin.get_sec_filing(symbol)
     
     # print("\n\nCompany Profile", company_profile)
     # print("\n\nBasic Financials", basic_fin)

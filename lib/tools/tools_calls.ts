@@ -1,10 +1,11 @@
 import {
-    IncomeStatementType,
-    SecSectionResponseType,
+    IncomeStatementResponse,
+    SecSectionResponse,
+    BasicFinancialsResponse
 }
     from "@/lib/tools/tools_types"
 
-export async function fetchIncomeStatement(symbol: string): Promise<IncomeStatementType> {
+export async function fetchIncomeStatement(symbol: string): Promise<IncomeStatementResponse> {
     const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
     const response = await fetch(`${baseUrl}/api/get_income_statement?symbol=${symbol}`);
 
@@ -13,12 +14,12 @@ export async function fetchIncomeStatement(symbol: string): Promise<IncomeStatem
         throw new Error(`Error fetching income statement: ${errorDetails.detail}`);
     }
 
-    const data: IncomeStatementType = await response.json();
+    const data: IncomeStatementResponse = await response.json();
     return data;
 }
 
 
-export async function fetchSecSection(ticker_symbol: string, section: string, fyear?: string, report_address?: string): Promise<SecSectionResponseType> {
+export async function fetchSecSection(ticker_symbol: string, section: string, fyear?: string, report_address?: string): Promise<SecSectionResponse> {
     const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
     const url = new URL(`${baseUrl}/api/get_10k_section`);
 
@@ -40,6 +41,26 @@ export async function fetchSecSection(ticker_symbol: string, section: string, fy
         throw new Error(`Error fetching 10-K section: ${errorDetails.detail}`);
     }
 
-    const data: SecSectionResponseType = await response.json();
+    const data: SecSectionResponse = await response.json();
+    return data;
+}
+
+
+export async function fetchBasicFinancials(symbol: string, selectedColumns?: string[]): Promise<BasicFinancialsResponse> {
+    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+    const params = new URLSearchParams({ symbol });
+
+    if (selectedColumns) {
+        params.append('selected_columns', selectedColumns.join(','));
+    }
+
+    const response = await fetch(`${baseUrl}/api/get_basic_financials?${params.toString()}`);
+
+    if (!response.ok) {
+        const errorDetails = await response.json();
+        throw new Error(`Error fetching basic financials: ${errorDetails.detail}`);
+    }
+
+    const data: BasicFinancialsResponse = await response.json();
     return data;
 }
