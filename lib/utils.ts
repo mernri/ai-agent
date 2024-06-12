@@ -14,3 +14,8 @@ export function formatUglyDate(dateStr: string): string {
 
   return date.toISOString().split('T')[0];
 }
+
+export function today(): string {
+  const date = new Date();
+  return date.toISOString().split('T')[0];
+}

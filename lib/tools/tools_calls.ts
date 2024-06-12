@@ -5,8 +5,16 @@ import {
     CompanyProfileResponse,
     CompanyNewsResponse,
     SecFilingResponse
+} from "@/lib/tools/tools_types"
+
+export const TOOLS_NAMES = {
+    "get_company_profile_tool": fetchCompanyProfile,
+    "get_company_news_tool": fetchCompanyNews,
+    "get_basic_financials_tools": fetchBasicFinancials,
+    "get_income_statement_tool": fetchIncomeStatement,
+    "get_10k_section_tool": fetchSecSection,
+    "get_sec_filing_tool": fetchSecFiling
 }
-    from "@/lib/tools/tools_types"
 
 export async function fetchIncomeStatement(symbol: string): Promise<IncomeStatementResponse> {
     const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
