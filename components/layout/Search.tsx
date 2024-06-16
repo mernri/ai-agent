@@ -27,8 +27,10 @@ import {
     CompanyNewsResponse,
     SecFilingResponse
 } from "@/lib/tools/tools_types"
+import { useOpenaiContext } from "@/context/OpenaiProvider"
+import { createThread } from "@/utils/apiHelpers/openai"
 
-export const Search = () => {
+export function Search() {
     const [selectedSymbol, setSelectedSymbol] = useState<string>("")
     const [incomeStatement, setIncomeStatement] = useState<IncomeStatementResponse | null>(null);
     const [secSection, setSecSection] = useState<SecSectionResponse | null>(null);
@@ -37,19 +39,26 @@ export const Search = () => {
     const [companyNews, setCompanyNews] = useState<CompanyNewsResponse | null>(null);
     const [secFiling, setSecFiling] = useState<SecFilingResponse | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const { threadId } = useOpenaiContext();
 
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        if (selectedSymbol) {
-            handleCompanyProfile(selectedSymbol)
-            handleFetchIncomeStatement(selectedSymbol);
-            handleFetchSecSection(selectedSymbol, "7")
-            handleBasicFinancials(selectedSymbol, ['revenueTTm', 'debtEquityTTM', 'peRatioTTM',
-                'pegRatioTTM', 'priceToBookTTM', 'priceToSalesTTM', 'dividendYieldTTM', 'roeTTM'])
-            handleCompanyNews(selectedSymbol)
-            handleSecFiling(selectedSymbol, "10-K")
+        // if (selectedSymbol) {
+        //     handleCompanyProfile(selectedSymbol)
+        //     handleFetchIncomeStatement(selectedSymbol);
+        //     handleFetchSecSection(selectedSymbol, "7")
+        //     handleBasicFinancials(selectedSymbol, ['revenueTTm', 'debtEquityTTM', 'peRatioTTM',
+        //         'pegRatioTTM', 'priceToBookTTM', 'priceToSalesTTM', 'dividendYieldTTM', 'roeTTM'])
+        //     handleCompanyNews(selectedSymbol)
+        //     handleSecFiling(selectedSymbol, "10-K")
+        // }
+
+        if (!threadId) {
+            // const thread = await createThread({})
+            // console.log("\n thread: ", thread)
         }
+
     };
 
 
