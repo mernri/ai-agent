@@ -123,10 +123,12 @@ export const Search = () => {
 
     return (
         <div className="flex flex-col gap-3 w-full">
-            <form onSubmit={handleSubmit} className="flex flex-grow items-center space-x-2 mb-6">
-                <p className="whitespace-nowrap text-l font-bold">Generate a financial report for</p>
-                <InputSymbolAutocomplete handleSelectSymbol={setSelectedSymbol} />
-                <Button type="submit">Generate</Button>
+            <form onSubmit={handleSubmit} className="flex flex-col lg:flex-row flex-grow items-center gap-3 mb-6 w-full">
+                <p className="whitespace-nowrap text-l font-bold w-full lg:w-auto">Generate a financial report for</p>
+                <div className="flex flex-row flex-grow items-center space-x-2 w-full">
+                    <InputSymbolAutocomplete handleSelectSymbol={setSelectedSymbol} />
+                    <Button type="submit" className="whitespace-nowrap">Generate</Button>
+                </div>
             </form>
 
             {/* {error && <div style={{ color: 'red' }}>{error}</div>} */}

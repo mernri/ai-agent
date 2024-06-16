@@ -1,21 +1,25 @@
-import { MainContent } from "@/components/layout/MainContent"
+import { Chat } from "@/components/layout/Chat"
 import { Search } from "@/components/layout/Search"
 import { ChatInput } from "@/components/ui/chat-input"
+import { MessagesProvider } from "@/context/MessagesProvider"
 
 const HomePage = () => {
     return (
-        <main className="flex min-h-screen flex-col items-center justify-between p-24">
-            <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
+        <main className="flex flex-col p-12 h-full w-auto justify-between">
+            <div className="w-full items-center justify-between font-mono text-sm">
                 <Search />
             </div>
 
-            <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-                <MainContent />
-            </div>
+            <MessagesProvider>
+                <div className="w-full items-center justify-between font-mono text-sm">
+                    <Chat />
+                </div>
 
-            <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-                <ChatInput />
-            </div>
+                <div className="w-full items-center justify-between font-mono text-sm absolute bottom-4 left-1 px-4">
+                    <ChatInput />
+                </div>
+            </MessagesProvider>
+
         </main>
     )
 }

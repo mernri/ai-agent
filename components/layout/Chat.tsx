@@ -1,12 +1,4 @@
-import {
-    ResizableHandle,
-    ResizablePanel,
-    ResizablePanelGroup,
-} from "@/components/ui/resizable"
-import { FormEvent, useState } from "react"
-
-
-export const MainContent = () => {
+export const Chat = () => {
     const messages = {
         "object": "list",
         "data": [
@@ -57,27 +49,29 @@ export const MainContent = () => {
     }
 
     return (
-        <div className="w-full bg-red-100">
-            {messages.data.map((message: any) => {
-                if (message.role === "user") {
-                    return (
-                        <div key={message.id} className="flex flex-row items-center justify-end">
-                            <div className="rounded-lg">
-                                {message.content[0].text.value}
+        <div className="flex flex-col w-full justify-between h-full">
+            <div className="w-full bg-red-100">
+                {messages.data.map((message: any) => {
+                    if (message.role === "user") {
+                        return (
+                            <div key={message.id} className="flex flex-row items-center justify-end">
+                                <div className="rounded-lg">
+                                    {message.content[0].text.value}
+                                </div>
                             </div>
-                        </div>
-                    )
-                }
-                else {
-                    return (
-                        <div key={message.id} className="flex flex-row items-center">
-                            <div className="rounded-lg">
-                                {message.content[0].text.value}
+                        )
+                    }
+                    else {
+                        return (
+                            <div key={message.id} className="flex flex-row items-center">
+                                <div className="rounded-lg">
+                                    {message.content[0].text.value}
+                                </div>
                             </div>
-                        </div>
-                    )
-                }
-            })}
+                        )
+                    }
+                })}
+            </div>
         </div>
     )
 }

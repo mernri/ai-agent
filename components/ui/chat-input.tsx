@@ -2,6 +2,7 @@
 import { AutosizeTextarea } from "@/components/ui/autosize-text-area"
 import { Button } from "@/components/ui/button"
 import { FormEvent, useState } from "react"
+import { PaperAirplaneIcon } from "@heroicons/react/20/solid"
 
 export const ChatInput = () => {
     const [userMessage, setUserMessage] = useState("")
@@ -24,7 +25,8 @@ export const ChatInput = () => {
 
             <Button className="absolute bottom-2 right-2"
                 onClick={(e) => handleSendMessage(e)}>
-                Send
+                <span className="hidden lg:inline mr-2">Send</span>
+                <PaperAirplaneIcon className="w-5 h-5" />
             </Button>
         </div>
     )
