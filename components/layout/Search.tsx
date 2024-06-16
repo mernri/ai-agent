@@ -41,15 +41,15 @@ export const Search = () => {
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        // if (selectedSymbol) {
-        //     handleCompanyProfile(selectedSymbol)
-        //     handleFetchIncomeStatement(selectedSymbol);
-        //     handleFetchSecSection(selectedSymbol, "7")
-        //     handleBasicFinancials(selectedSymbol, ['revenueTTm', 'debtEquityTTM', 'peRatioTTM',
-        //         'pegRatioTTM', 'priceToBookTTM', 'priceToSalesTTM', 'dividendYieldTTM', 'roeTTM'])
-        //     handleCompanyNews(selectedSymbol)
-        //     handleSecFiling(selectedSymbol, "10-K")
-        // }
+        if (selectedSymbol) {
+            handleCompanyProfile(selectedSymbol)
+            handleFetchIncomeStatement(selectedSymbol);
+            handleFetchSecSection(selectedSymbol, "7")
+            handleBasicFinancials(selectedSymbol, ['revenueTTm', 'debtEquityTTM', 'peRatioTTM',
+                'pegRatioTTM', 'priceToBookTTM', 'priceToSalesTTM', 'dividendYieldTTM', 'roeTTM'])
+            handleCompanyNews(selectedSymbol)
+            handleSecFiling(selectedSymbol, "10-K")
+        }
     };
 
 

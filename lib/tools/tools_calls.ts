@@ -18,7 +18,7 @@ export const TOOLS_NAMES = {
 
 export async function fetchIncomeStatement(symbol: string): Promise<IncomeStatementResponse> {
     const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-    const response = await fetch(`${baseUrl}/api/get_income_statement?symbol=${symbol}`);
+    const response = await fetch(`${baseUrl}/api/py/get_income_statement?symbol=${symbol}`);
 
     if (!response.ok) {
         const errorDetails = await response.json();
@@ -32,7 +32,7 @@ export async function fetchIncomeStatement(symbol: string): Promise<IncomeStatem
 
 export async function fetchSecSection(ticker_symbol: string, section: string, fyear?: string, report_address?: string): Promise<SecSectionResponse> {
     const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-    const url = new URL(`${baseUrl}/api/get_10k_section`);
+    const url = new URL(`${baseUrl}/api/py/get_10k_section`);
 
     url.searchParams.append('ticker_symbol', ticker_symbol);
     url.searchParams.append('section', section);
@@ -65,7 +65,7 @@ export async function fetchBasicFinancials(symbol: string, selectedColumns?: str
         params.append('selected_columns', selectedColumns.join(','));
     }
 
-    const response = await fetch(`${baseUrl}/api/get_basic_financials?${params.toString()}`);
+    const response = await fetch(`${baseUrl}/api/py/get_basic_financials?${params.toString()}`);
 
     if (!response.ok) {
         const errorDetails = await response.json();
@@ -80,7 +80,7 @@ export async function fetchBasicFinancials(symbol: string, selectedColumns?: str
 
 export async function fetchCompanyProfile(symbol: string): Promise<CompanyProfileResponse> {
     const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
-    const response = await fetch(`${baseUrl}/api/get_company_profile?symbol=${symbol}`);
+    const response = await fetch(`${baseUrl}/api/py/get_company_profile?symbol=${symbol}`);
 
     if (!response.ok) {
         const errorDetails = await response.json();
@@ -106,7 +106,7 @@ export async function fetchCompanyNews(symbol: string, start_date?: string, end_
 
     params.append('max_news_num', max_news_num.toString());
 
-    const response = await fetch(`${baseUrl}/api/get_company_news?${params.toString()}`);
+    const response = await fetch(`${baseUrl}/api/py/get_company_news?${params.toString()}`);
 
     if (!response.ok) {
         const errorDetails = await response.json();
@@ -131,7 +131,7 @@ export async function fetchSecFiling(symbol: string, form?: string, fromDate?: s
         params.append('to_date', toDate);
     }
 
-    const response = await fetch(`${baseUrl}/api/get_sec_filing?${params.toString()}`);
+    const response = await fetch(`${baseUrl}/api/py/get_sec_filing?${params.toString()}`);
 
     if (!response.ok) {
         const errorDetails = await response.json();

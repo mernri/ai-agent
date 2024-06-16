@@ -22,7 +22,6 @@ class FinnhubUtils:
             raise Exception("Missing FINNHUB_API_KEY in .env")
         else:
             finnhub_client = finnhub.Client(api_key=os.environ.get("FINNHUB_API_KEY"))
-            print("\nSuccessfully initialized Finnhub client!\n")
             return finnhub_client
 
     def get_company_profile(self, symbol: Annotated[str, "ticker symbol"]) -> str:
