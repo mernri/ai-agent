@@ -1,11 +1,12 @@
 "use client"
 import { useMessagesContext } from "@/context/MessagesProvider"
+import { ScrollArea } from "@/components/ui/scroll-area"
 
 export const Chat = () => {
     const { messages } = useMessagesContext();
 
     return (
-        <div className="flex flex-col w-full justify-between h-full px-2">
+        <ScrollArea className="flex flex-col w-full justify-between h-full px-2">
             <div className=" flex flex-col gap-2">
                 {messages.map((message: any) => {
                     if (message.role === "user") {
@@ -28,6 +29,6 @@ export const Chat = () => {
                     }
                 })}
             </div>
-        </div>
+        </ScrollArea>
     )
 }

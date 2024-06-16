@@ -10,6 +10,7 @@ export const ChatInput = () => {
     const { addUserMessage } = useMessagesContext();
 
     const handleSendMessage = (e: FormEvent) => {
+        if (userMessage.trim() === "") return
         e.preventDefault()
         addUserMessage(userMessage)
         setUserMessage("")
@@ -23,10 +24,17 @@ export const ChatInput = () => {
                 maxHeight={200}
                 value={userMessage}
                 onChange={(e) => setUserMessage(e.target.value)}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault(); // Prevents adding a new line in the textarea
+                        handleSendMessage(e);
+                    }
+                }}
             />
 
             <Button className="absolute bottom-2 right-2"
-                onClick={(e) => handleSendMessage(e)}>
+                onClick={(e) => handleSendMessage(e)}
+            >
                 <span className="hidden lg:inline mr-2">Send</span>
                 <PaperAirplaneIcon className="w-5 h-5" />
             </Button>

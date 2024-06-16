@@ -1,10 +1,12 @@
 "use client"
 import { createContext, useState, useContext } from 'react'
+import { makeId } from '@/utils/index'
 
 
 interface Message {
     content: string,
     role: 'user' | 'assistant',
+    id: string
 }
 
 interface MessagesContextType {
@@ -23,17 +25,13 @@ const MessagesContext = createContext<MessagesContextType>({
 
 // Step 2 : Create the context wrapper (the provider)
 export function MessagesProvider({ children }: { children: React.ReactNode }) {
-    const [messages, setMessages] = useState<Message[]>([
-        {
-            content: "Hello! How can I help you today?",
-            role: "assistant"
-        }, { content: "I need help with my order", role: "user" }
-    ])
+    const [messages, setMessages] = useState<Message[]>([])
 
     const addUserMessage = (content: string) => {
         const newMessage: Message = {
             content: content,
-            role: "user"
+            role: "user",
+            id: makeId("usr")
         };
         setMessages(prevMessages => [...prevMessages, newMessage]);
     };
@@ -41,7 +39,8 @@ export function MessagesProvider({ children }: { children: React.ReactNode }) {
     const addAssistantMessage = (content: string) => {
         const newMessage: Message = {
             content: content,
-            role: "assistant"
+            role: "assistant",
+            id: makeId("asst")
         };
         setMessages(prevMessages => [...prevMessages, newMessage]);
     };
