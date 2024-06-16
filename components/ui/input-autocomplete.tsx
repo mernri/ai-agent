@@ -14,7 +14,7 @@ const InputSymbolAutocomplete = ({ handleSelectSymbol }: { handleSelectSymbol: a
         } else {
             setDisplaySymbolsList(false);
         }
-    }, [stocks.length]);
+    }, [input.length]);
 
     const handleSelectStock = (ticker: string) => {
         setInput(ticker);
