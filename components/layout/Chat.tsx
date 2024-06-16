@@ -22,7 +22,7 @@ export const Chat = () => {
                         </div>
                     </div>
                 ))}
-                {/* Élément invisible à la fin de la liste pour servir de cible au scroll */}
+                {/* invisible element : scroll target ref */}
                 <div ref={endOfMessagesRef} />
             </div>
         </div>

@@ -13,13 +13,15 @@ interface MessagesContextType {
     messages: Message[];
     setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
     addUserMessage: (content: string) => void;
+    addAssistantMessage: (content: string) => void;
 }
 
 // Step 1 : Create the context 
 const MessagesContext = createContext<MessagesContextType>({
     messages: [],
     setMessages: () => { },
-    addUserMessage: () => { }
+    addUserMessage: () => { },
+    addAssistantMessage: () => { }
 });
 
 
@@ -46,7 +48,12 @@ export function MessagesProvider({ children }: { children: React.ReactNode }) {
     };
 
     return (
-        <MessagesContext.Provider value={{ messages, setMessages, addUserMessage }}>
+        <MessagesContext.Provider value={{
+            messages,
+            setMessages,
+            addUserMessage,
+            addAssistantMessage
+        }}>
             {children}
         </MessagesContext.Provider>
     )

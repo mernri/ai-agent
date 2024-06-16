@@ -36,8 +36,22 @@ export const Search = () => {
     const [companyProfile, setCompanyProfile] = useState<CompanyProfileResponse | null>(null);
     const [companyNews, setCompanyNews] = useState<CompanyNewsResponse | null>(null);
     const [secFiling, setSecFiling] = useState<SecFilingResponse | null>(null);
-
     const [error, setError] = useState<string | null>(null);
+
+
+    const handleSubmit = async (e: FormEvent) => {
+        e.preventDefault();
+        // if (selectedSymbol) {
+        //     handleCompanyProfile(selectedSymbol)
+        //     handleFetchIncomeStatement(selectedSymbol);
+        //     handleFetchSecSection(selectedSymbol, "7")
+        //     handleBasicFinancials(selectedSymbol, ['revenueTTm', 'debtEquityTTM', 'peRatioTTM',
+        //         'pegRatioTTM', 'priceToBookTTM', 'priceToSalesTTM', 'dividendYieldTTM', 'roeTTM'])
+        //     handleCompanyNews(selectedSymbol)
+        //     handleSecFiling(selectedSymbol, "10-K")
+        // }
+    };
+
 
     const handleFetchIncomeStatement = async (symbol: string) => {
         try {
@@ -50,7 +64,6 @@ export const Search = () => {
         }
     };
 
-
     const handleFetchSecSection = async (ticker_symbol: string, section: string, fyear?: string, report_address?: string) => {
         try {
             const result = await fetchSecSection(ticker_symbol, section, fyear, report_address);
@@ -61,7 +74,6 @@ export const Search = () => {
             setSecSection(null);
         }
     };
-
 
     const handleBasicFinancials = async (symbol: string, selectedColumns?: string[]) => {
         try {
@@ -107,19 +119,6 @@ export const Search = () => {
         }
     }
 
-
-    const handleSubmit = (e: FormEvent) => {
-        e.preventDefault();
-        if (selectedSymbol) {
-            handleCompanyProfile(selectedSymbol)
-            handleFetchIncomeStatement(selectedSymbol);
-            // handleFetchSecSection(selectedSymbol, "7")
-            handleBasicFinancials(selectedSymbol, ['revenueTTm', 'debtEquityTTM', 'peRatioTTM',
-                'pegRatioTTM', 'priceToBookTTM', 'priceToSalesTTM', 'dividendYieldTTM', 'roeTTM'])
-            handleCompanyNews(selectedSymbol)
-            handleSecFiling(selectedSymbol, "10-K")
-        }
-    };
 
     return (
         <div>

@@ -1,6 +1,5 @@
 import { OpenAI } from "openai";
-import { TOOLS_NAMES } from "../tools/tools_calls";
-import { today } from "../utils";
+import { TOOLS_NAMES } from "../../lib/tools/tools_calls";
 
 export const getOpenaiClient = () => {
     const openai_api_key = process.env.OPENAI_API_KEY
@@ -21,6 +20,7 @@ export const createAssistant = async ({
     response_format = "auto"
 }: OpenAI.Beta.AssistantCreateParams) => {
     const client = getOpenaiClient();
+
     try {
         const assistant = await client.beta.assistants.create({
             name,
@@ -62,7 +62,11 @@ export const updateAssistant = async ({ assistant_id, params }:
     }
 };
 
-export const createThread = async ({ messages, metadata, tool_resources }: OpenAI.Beta.Threads.ThreadCreateParams) => {
+export const createThread = async ({
+    messages,
+    metadata,
+    tool_resources,
+}: Partial<OpenAI.Beta.Threads.ThreadCreateParams>) => {
     const client = getOpenaiClient();
 
     try {

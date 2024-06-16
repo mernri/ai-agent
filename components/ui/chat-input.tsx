@@ -6,14 +6,23 @@ import { PaperAirplaneIcon } from "@heroicons/react/20/solid"
 import { useMessagesContext } from "@/context/MessagesProvider"
 
 export const ChatInput = () => {
-    const [userMessage, setUserMessage] = useState("")
-    const { addUserMessage } = useMessagesContext();
+    const [inputValue, setInputValue] = useState("")
+    const { addUserMessage, addAssistantMessage } = useMessagesContext();
+
 
     const handleSendMessage = (e: FormEvent) => {
-        if (userMessage.trim() === "") return
         e.preventDefault()
-        addUserMessage(userMessage)
-        setUserMessage("")
+        if (inputValue.trim() === "") return
+
+        // Add the user message to the context
+        addUserMessage(inputValue)
+        setInputValue("")
+
+        // Generate Assistant response
+        // const assistantResponse = generateAssistantResponse(inputValue)
+
+        // Add the assistant response to the context
+        // addAssistantMessage(assistantResponse)
     }
 
     return (
@@ -22,8 +31,8 @@ export const ChatInput = () => {
                 placeholder="Type your message here..."
                 className="w-full relative bg-gray-100"
                 maxHeight={200}
-                value={userMessage}
-                onChange={(e) => setUserMessage(e.target.value)}
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault(); // Prevents adding a new line in the textarea
