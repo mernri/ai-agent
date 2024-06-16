@@ -28,7 +28,7 @@ import {
     SecFilingResponse
 } from "@/lib/tools/tools_types"
 
-export const Header = () => {
+export const Search = () => {
     const [selectedSymbol, setSelectedSymbol] = useState<string>("")
     const [incomeStatement, setIncomeStatement] = useState<IncomeStatementResponse | null>(null);
     const [secSection, setSecSection] = useState<SecSectionResponse | null>(null);

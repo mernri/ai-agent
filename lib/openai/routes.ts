@@ -1,4 +1,4 @@
-import OpenAI from "openai";
+import { OpenAI } from "openai";
 import { TOOLS_NAMES } from "../tools/tools_calls";
 import { today } from "../utils";
 
@@ -41,7 +41,9 @@ export const createAssistant = async ({
     }
 };
 
-export const updateAssistant = async ({ assistant_id, params }: { assistant_id: string, params: OpenAI.Beta.AssistantUpdateParams }) => {
+export const updateAssistant = async ({ assistant_id, params }:
+    { assistant_id: string, params: OpenAI.Beta.AssistantUpdateParams }) => {
+
     const client = getOpenaiClient();
 
     const payload = Object.entries(params).reduce((acc: Record<string, any>, [key, value]) => {
@@ -60,11 +62,11 @@ export const updateAssistant = async ({ assistant_id, params }: { assistant_id: 
     }
 };
 
-export const createThread = async (params: OpenAI.Beta.ThreadCreateParams) => {
+export const createThread = async ({ messages, metadata, tool_resources }: OpenAI.Beta.Threads.ThreadCreateParams) => {
     const client = getOpenaiClient();
 
     try {
-        const thread = await client.beta.threads.create(params);
+        const thread = await client.beta.threads.create({ messages, metadata, tool_resources });
         return thread;
     } catch (error) {
         console.error(`\n❌ Failed to create a thread: ${error}`);
@@ -83,11 +85,22 @@ export const retrieveAssistant = async (assistant_id: string) => {
     }
 };
 
-export const addMessageToThread = async (threadId: string, message: OpenAI.Beta.Threads.MessageContent) => {
+export const addMessageToThread = async ({
+    threadId,
+    content,
+    role,
+    attachment
+}: {
+    threadId: string;
+    content: string;
+    role: 'assistant' | 'user';
+    attachment?: OpenAI.Beta.Threads.MessageCreateParams.Attachment
+}) => {
     const client = getOpenaiClient();
+    const attachments = attachment ? [attachment] : null;
 
     try {
-        const threadMessages = await client.beta.threads.messages.create(threadId, message);
+        const threadMessages = await client.beta.threads.messages.create(threadId, { content, role, attachments });
         return threadMessages;
     } catch (error) {
         console.error(`\n❌ Failed to add message to thread: ${error}`);
@@ -117,14 +130,27 @@ export const listThreadMessages = async (threadId: string) => {
     }
 };
 
-export const fetchThreadRuns = async (threadId: string, params?: OpenAI.Beta.Threads.RunListParams) => {
+export const fetchThreadRuns = async ({
+    threadId,
+    before,
+    order
+}: {
+    threadId: string;
+    before?: string;
+    order?: "asc" | "desc";
+}) => {
     const client = getOpenaiClient();
 
     try {
-        // Build query string from parameters object
-        const queryParams = new URLSearchParams(params as any).toString();
-        const runs = await client.beta.threads.runs.list(`${threadId}?${queryParams}`);
-        return runs;
+        // Build query string 
+        const queryParams = new URLSearchParams();
+        if (before) queryParams.append('before', before);
+        if (order) queryParams.append('order', order);
+        const queryString = queryParams.toString();
+
+        // Fetch thread runs
+        const runs = await client.beta.threads.runs.list(`${threadId}?${queryString}`);
+        return runs.data;
 
     } catch (error) {
         console.error(`\n❌ Failed to list thread runs: ${error}`);
@@ -132,12 +158,22 @@ export const fetchThreadRuns = async (threadId: string, params?: OpenAI.Beta.Thr
     }
 };
 
-export const listRunSteps = async (threadId: string, runId: string, params?: OpenAI.Beta.Threads.Runs.Steps.StepListParams) => {
+export const listRunSteps = async ({
+    threadId,
+    runId,
+    query,
+    options
+}: {
+    threadId: string;
+    runId: string;
+    query?: OpenAI.Beta.Threads.Runs.Steps.StepListParams;
+    options?: any; // type RequestOptions (method, path, headers, maxRetries, etc..)
+}) => {
     const client = getOpenaiClient();
 
     try {
-        const queryParams = new URLSearchParams(params as any).toString();
-        const runSteps = await client.beta.threads.runs.steps.list(threadId, runId, queryParams);
+        const queryParams = query ? new URLSearchParams(query as any).toString() : '';
+        const runSteps = await client.beta.threads.runs.steps.list(threadId, runId, query, options);
         return runSteps;
     } catch (error) {
         console.error(`\n❌ Failed to list run steps: ${error}`);
@@ -145,8 +181,9 @@ export const listRunSteps = async (threadId: string, runId: string, params?: Ope
     }
 };
 
-
-export const cancelRun = async (threadId: string, runId: string) => {
+export const cancelRun = async ({ threadId, runId }: {
+    threadId: string; runId: string
+}) => {
     const client = getOpenaiClient();
     try {
         const run = await client.beta.threads.runs.cancel(threadId, runId);
@@ -158,12 +195,10 @@ export const cancelRun = async (threadId: string, runId: string) => {
 };
 
 
-// TODO : A UPDATER ? 
-
-export const waitOnRun = async (run: any, thread: any) => {
+export const waitOnRun = async ({ run, thread }: { run: OpenAI.Beta.Threads.Runs.Run, thread: OpenAI.Beta.Threads.Thread }) => {
     const client = getOpenaiClient();
     while (run.status === 'queued' || run.status === 'in_progress' || run.status === 'cancelling') {
-        await listRunSteps(thread.id, run.id);
+        await listRunSteps({ threadId: thread.id, runId: run.id });
         try {
             run = await client.beta.threads.runs.retrieve(thread.id, run.id);
             console.log(`\n⏳ Waiting 0.8 seconds for the run ${run.id} to complete. Ongoing Run Status is : ${run.status}`);
@@ -181,7 +216,8 @@ type ToolFunction = (...args: any[]) => any;
 interface ToolsNames {
     [key: string]: ToolFunction;
 }
-export const performRequiredActions = async (run: OpenAI.Beta.Threads.Run, toolsDict: ToolsNames = TOOLS_NAMES) => {
+
+export const performRequiredActions = async ({ run, toolsDict = TOOLS_NAMES }: { run: OpenAI.Beta.Threads.Run, toolsDict?: ToolsNames }) => {
     const toolsOutputs: { tool_call_id: string; output: string }[] = [];
     const runToolsCalls = run.required_action ? run.required_action.submit_tool_outputs.tool_calls : [];
 
@@ -219,10 +255,9 @@ export const performRequiredActions = async (run: OpenAI.Beta.Threads.Run, tools
 };
 
 
-// TODO : A UPDATER ? 
-export const handleRunWithRequiredActions = async (run: any, thread: any) => {
+export const handleRunWithRequiredActions = async ({ run, thread }: { run: OpenAI.Beta.Threads.Runs.Run, thread: OpenAI.Beta.Threads.Thread }) => {
     const client = getOpenaiClient();
-    const { success, toolsOutputs } = await performRequiredActions(run);
+    const { success, toolsOutputs } = await performRequiredActions({ run });
     if (success) {
         try {
             console.log(`\n🚧 Submitting tool outputs for run ${run.id} and thread ${thread.id}`);
@@ -235,21 +270,25 @@ export const handleRunWithRequiredActions = async (run: any, thread: any) => {
             throw error;
         }
     } else {
-        run = await cancelRun(thread.id, run.id);
+        run = await cancelRun({ threadId: thread.id, runId: run.id });
         console.error(`\n❌ Failed at performing required actions - RUN CANCELED`);
     }
 
-    run = await waitOnRun(run, thread);
+    run = await waitOnRun({ run: run, thread: thread });
 
     return run;
 };
 
 
-export const runThread = async (threadId: string, params: any) => {
+export const runThread = async ({ threadId, body, options }: {
+    threadId: string,
+    body: OpenAI.Beta.Threads.Runs.RunCreateParams,
+    options?: any // type RequestOptions (method, path, headers, maxRetries, etc..)
+}): Promise<any> => { // Can return a Run or a StreamEvent
     const client = getOpenaiClient();
 
     try {
-        const run = await client.beta.threads.runs.create(threadId, params);
+        const run = await client.beta.threads.runs.create(threadId, body, options);
         return run;
     } catch (error) {
         console.error(`\n❌ Failed to create run: ${error}`);
@@ -258,22 +297,28 @@ export const runThread = async (threadId: string, params: any) => {
 };
 
 
-// TODO : A UPDATER 
-export const addUserMessageAndRun = async (thread: any, userMessage: OpenAI.Beta.Threads.MessageContent, assistantId: string, additionalInstructions: string | null = null) => {
+export const addUserMessageAndRun = async ({ thread, userMessage, body, withStreaming = false }
+    : {
+        thread: OpenAI.Beta.Threads.Thread,
+        userMessage: string,
+        body: OpenAI.Beta.Threads.Runs.RunCreateParams, // additional_instructions, assistant_id, additional_messages, instructions, max_completion_tokens, max_prompt_tokens, model, parallel_tool_calls
+        withStreaming?: boolean
+    }) => {
     try {
         const threadId = thread.id;
-        const runs = await fetchThreadRuns(threadId);
+        const runs = await fetchThreadRuns({ threadId });
+
         if (runs && runs.length > 0) {
             console.log(`\n🚧 There are ${runs.length} runs in the thread ${threadId}.`);
             let lastRun = runs[0];
 
             if (lastRun) {
                 if (lastRun.status === "requires_action") {
-                    lastRun = await handleRunWithRequiredActions(lastRun, thread);
+                    lastRun = await handleRunWithRequiredActions({ run: lastRun, thread: thread });
                 }
 
                 if (["queued", "in_progress", "cancelling"].includes(lastRun.status)) {
-                    lastRun = await waitOnRun(lastRun, thread);
+                    lastRun = await waitOnRun({ run: lastRun, thread: thread });
                 }
 
                 console.log(`\n🚧 The last run status is now : ${lastRun.status}`);
@@ -281,32 +326,36 @@ export const addUserMessageAndRun = async (thread: any, userMessage: OpenAI.Beta
         }
 
         console.log(`\n🚧 Adding the following user message to the thread: ${userMessage.substring(0, 30)}...`);
-        await addMessageToThread(threadId, userMessage);
+        await addMessageToThread({ threadId, content: userMessage, role: "user" });
 
-        const { run, assistantId: openaiAssistantId } = await runThread(threadId, assistantId, additionalInstructions);
-        let finalRun = await waitOnRun(run, thread);
+        body.stream = withStreaming ? true : false;
+        const run = await runThread({ threadId: threadId, body: body });
+        let finalRun = await waitOnRun({ run: run, thread: thread });
 
-        await listRunSteps(threadId, finalRun.id);
+        await listRunSteps({ threadId: threadId, runId: finalRun.id });
 
         if (finalRun.status === "requires_action") {
             console.log(`\n🚧 Handling run ${finalRun.id} with required actions...\n`);
-            finalRun = await handleRunWithRequiredActions(finalRun, thread);
+            finalRun = await handleRunWithRequiredActions({ run: finalRun, thread: thread });
         }
         const tokenUsage = finalRun.usage;
 
-        return { thread, openaiAssistantId, tokenUsage };
+        return { thread, tokenUsage };
     } catch (error) {
         console.error(`\n❌ Failed to add user message or run for thread ID ${thread.id}: ${error}\n`);
         throw error;
     }
 }
 
-// TODO : A UPDATER 
-export const generateAssistantResponse = async (threadId: string, messageBody: OpenAI.Beta.Threads.MessageContent, messageId: string, assistantId: string) => {
-    console.log(`\n🏁 Starting the process of generating an OpenAI response to the user...`);
 
-    const currentDate = today();
-    const additionalInstructions = `Today is ${currentDate}.`;
+export const generateAssistantResponse = async ({ threadId, messageBody, body, withStreaming = false }:
+    {
+        threadId: string,
+        messageBody: string,
+        body: OpenAI.Beta.Threads.Runs.RunCreateParams,
+        withStreaming?: boolean
+    }) => {
+    console.log(`\n🏁 Starting the process of generating an OpenAI response to the user...`);
 
     try {
         const thread = await fetchThread(threadId);
@@ -315,7 +364,7 @@ export const generateAssistantResponse = async (threadId: string, messageBody: O
         }
 
         console.log(`\n🧵 We are about to add the user message to the thread and run it...`);
-        const { thread: updatedThread, openaiAssistantId, tokenUsage } = await addUserMessageAndRun(thread, messageBody, assistantId, additionalInstructions);
+        const { thread: updatedThread, tokenUsage } = await addUserMessageAndRun({ thread: thread, userMessage: messageBody, body: body, withStreaming: withStreaming });
 
         if (!updatedThread) {
             throw new Error(`\n❌ Failed to add user message (${messageBody.substring(0, 20)}...) and run the thread ID ${threadId}`);
@@ -330,10 +379,10 @@ export const generateAssistantResponse = async (threadId: string, messageBody: O
             const assistantResponse = assistantMessages[0].content[0].type == "text" ? assistantMessages[0].content[0].text.value : ''
             console.log(`\n👍 Successfully generated the following assistant response: ${assistantResponse.substring(0, 40)}...`);
 
-            const assistantCalled = await retrieveAssistant(openaiAssistantId);
+            const assistantCalled = await retrieveAssistant(body?.assistant_id);
 
             if (!assistantCalled) {
-                throw new Error(`\n❌ No assistant found with ID ${openaiAssistantId}`)
+                throw new Error(`\n❌ No assistant found with ID ${body?.assistant_id}`)
             }
 
             return assistantResponse.substring(0, 4095);

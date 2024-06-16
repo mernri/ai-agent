@@ -2,6 +2,7 @@
 finnhub-python
 yfinance
 sec_api
+fmpsdk
 
 # ai libraries
 openai

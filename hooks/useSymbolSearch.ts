@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-
 export interface Stock {
     ticker: string;
     name: string;
@@ -11,6 +10,8 @@ export const useSymbolSearch = (searchQuery: string) => {
     const [isLoading, setLoading] = useState(false);
     const [stocks, setStocks] = useState<Stock[]>([]);
     const [error, setError] = useState<string | null>(null);
+
+
 
     useEffect(() => {
         if (!searchQuery) {
@@ -26,8 +27,7 @@ export const useSymbolSearch = (searchQuery: string) => {
                 const response = await fetch(`https://dumbstockapi.com/stock?ticker_search=${searchQuery}&exchanges=NASDAQ,NYSE&is_etf=false`, {
                     method: 'GET',
                     headers: { 'Accept': 'application/json' }
-                });
-
+                })
 
                 if (!response.ok) {
                     throw new Error('Failed to fetch data');
@@ -50,7 +50,6 @@ export const useSymbolSearch = (searchQuery: string) => {
                 setLoading(false);
             }
         };
-
         fetchStocks();
     }, [searchQuery]);
 
