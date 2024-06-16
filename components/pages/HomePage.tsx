@@ -5,7 +5,7 @@ import { MessagesProvider } from "@/context/MessagesProvider"
 
 const HomePage = () => {
     return (
-        <main className="flex flex-col p-12 h-full w-auto justify-between">
+        <main className="flex flex-col p-12 h-full w-auto justify-between px-4">
             <div className="w-full items-center justify-between font-mono text-sm">
                 <Search />
             </div>
@@ -19,7 +19,6 @@ const HomePage = () => {
                     <ChatInput />
                 </div>
             </MessagesProvider>
-
         </main>
     )
 }

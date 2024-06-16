@@ -18,7 +18,7 @@ export const BlurInTextWithCollapsible = ({ text, collapsible }: BlurInTextWithC
                     {text}
                 </AccordionTrigger>
                 <AccordionContent>
-                    <div className="w-full max-w-4xl mt-4">
+                    <div className="w-full max-w-4xl">
                         {collapsible}
                     </div>
                 </AccordionContent>

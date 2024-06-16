@@ -122,7 +122,7 @@ export const Search = () => {
     };
 
     return (
-        <div className="flex flex-col gap-3 w-full">
+        <div>
             <form onSubmit={handleSubmit} className="flex flex-col lg:flex-row flex-grow items-center gap-3 mb-6 w-full">
                 <p className="whitespace-nowrap text-l font-bold w-full lg:w-auto">Generate a financial report for</p>
                 <div className="flex flex-row flex-grow items-center space-x-2 w-full">

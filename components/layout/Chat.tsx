@@ -1,62 +1,18 @@
+"use client"
+import { useMessagesContext } from "@/context/MessagesProvider"
+
 export const Chat = () => {
-    const messages = {
-        "object": "list",
-        "data": [
-            {
-                "id": "msg_abc123",
-                "object": "thread.message",
-                "created_at": 1699016383,
-                "assistant_id": null,
-                "thread_id": "thread_abc123",
-                "run_id": null,
-                "role": "user",
-                "content": [
-                    {
-                        "type": "text",
-                        "text": {
-                            "value": "How does AI work? Explain it in simple terms.",
-                            "annotations": []
-                        }
-                    }
-                ],
-                "attachments": [],
-                "metadata": {}
-            },
-            {
-                "id": "msg_abc456",
-                "object": "thread.message",
-                "created_at": 1699016383,
-                "assistant_id": null,
-                "thread_id": "thread_abc123",
-                "run_id": null,
-                "role": "assistant",
-                "content": [
-                    {
-                        "type": "text",
-                        "text": {
-                            "value": "AI in simple terms",
-                            "annotations": []
-                        }
-                    }
-                ],
-                "attachments": [],
-                "metadata": {}
-            }
-        ],
-        "first_id": "msg_abc123",
-        "last_id": "msg_abc456",
-        "has_more": false
-    }
+    const { messages } = useMessagesContext();
 
     return (
-        <div className="flex flex-col w-full justify-between h-full">
-            <div className="w-full bg-red-100">
-                {messages.data.map((message: any) => {
+        <div className="flex flex-col w-full justify-between h-full px-2">
+            <div className=" flex flex-col gap-2">
+                {messages.map((message: any) => {
                     if (message.role === "user") {
                         return (
-                            <div key={message.id} className="flex flex-row items-center justify-end">
-                                <div className="rounded-lg">
-                                    {message.content[0].text.value}
+                            <div key={message.id} className="flex flex-row justify-end w-full">
+                                <div className="rounded-lg text-right bg-gray-100 p-4 text-xs">
+                                    {message.content}
                                 </div>
                             </div>
                         )
@@ -64,8 +20,8 @@ export const Chat = () => {
                     else {
                         return (
                             <div key={message.id} className="flex flex-row items-center">
-                                <div className="rounded-lg">
-                                    {message.content[0].text.value}
+                                <div className="text-xs">
+                                    {message.content}
                                 </div>
                             </div>
                         )
