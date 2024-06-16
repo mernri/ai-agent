@@ -2,31 +2,52 @@
 import { createContext, useState, useContext } from 'react'
 
 
-interface MessageType {
+interface Message {
     content: string,
-    role: string, // user or assistant
+    role: 'user' | 'assistant',
 }
 
-type MessagesType = MessageType[]
-
 interface MessagesContextType {
-    messages: MessagesType;
-    setMessages: React.Dispatch<React.SetStateAction<MessagesType>>;
+    messages: Message[];
+    setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
+    addUserMessage: (content: string) => void;
 }
 
 // Step 1 : Create the context 
 const MessagesContext = createContext<MessagesContextType>({
     messages: [],
-    setMessages: () => { }
+    setMessages: () => { },
+    addUserMessage: () => { }
 });
 
 
 // Step 2 : Create the context wrapper (the provider)
 export function MessagesProvider({ children }: { children: React.ReactNode }) {
-    const [messages, setMessages] = useState<MessageType[]>([])
+    const [messages, setMessages] = useState<Message[]>([
+        {
+            content: "Hello! How can I help you today?",
+            role: "assistant"
+        }, { content: "I need help with my order", role: "user" }
+    ])
+
+    const addUserMessage = (content: string) => {
+        const newMessage: Message = {
+            content: content,
+            role: "user"
+        };
+        setMessages(prevMessages => [...prevMessages, newMessage]);
+    };
+
+    const addAssistantMessage = (content: string) => {
+        const newMessage: Message = {
+            content: content,
+            role: "assistant"
+        };
+        setMessages(prevMessages => [...prevMessages, newMessage]);
+    };
 
     return (
-        <MessagesContext.Provider value={{ messages, setMessages }}>
+        <MessagesContext.Provider value={{ messages, setMessages, addUserMessage }}>
             {children}
         </MessagesContext.Provider>
     )
