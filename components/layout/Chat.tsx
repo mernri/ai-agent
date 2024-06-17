@@ -1,6 +1,7 @@
 "use client"
 import * as React from "react";
 import { useMessagesContext } from "@/context/MessagesProvider";
+import he from 'he';
 
 export const Chat = () => {
     const { messages } = useMessagesContext();
@@ -20,16 +21,16 @@ export const Chat = () => {
                     if (message.role === 'assistant') {
                         return (
                             <div key={index} className="flex flex-row justify-start w-full">
-                                <div className="text-justify py-4 text-base">
-                                    {message.content}
+                                <div className="text-justify py-3 text-sm">
+                                    <pre className="whitespace-pre-wrap text-justify">{he.decode(message.content)}</pre>
                                 </div>
                             </div>
                         )
                     }
                     else {
                         return (
-                            <div key={index} className="flex flex-row justify-end w-full">
-                                <div className="rounded-lg text-right bg-gray-100 p-4 text-base	">
+                            <div key={index} className="flex flex-row justify-end w-full py-1">
+                                <div className="rounded-lg text-right bg-gray-100 p-4 text-sm">
                                     {message.content}
                                 </div>
                             </div>

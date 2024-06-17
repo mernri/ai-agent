@@ -63,8 +63,6 @@ export const addMessageToThread = async (params: {
         }
 
         const data: OpenAI.Beta.Threads.Message = await response.json();
-
-        console.log(`\n✅ Added message to thread: ${data.id}`)
         return data;
     } catch (error) {
         console.error(`\n❌ Failed to add message to thread: ${error}`);

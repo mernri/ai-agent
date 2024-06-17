@@ -9,7 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 const HomePage = () => {
     return (
         <OpenaiProvider>
-            <main className="flex flex-col h-screen p-12 px-4">
+            <main className="flex flex-col h-screen p-12 px-4 bg-gray-50">
                 <div className="flex-none">
                     <Search />
                 </div>
