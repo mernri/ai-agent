@@ -1,6 +1,7 @@
 "use client"
 import { createContext, useState, useContext } from 'react';
 import { makeId } from '@/utils/index';
+import { addMessageToThread, createThread, runAndStream } from "@/utils/api-helpers/openai"
 
 interface Message {
     content: string,
@@ -28,14 +29,47 @@ const MessagesContext = createContext<MessagesContextType>({
 // Step 2 : Create the context wrapper (the provider)
 export function MessagesProvider({ children }: { children: React.ReactNode }) {
     const [messages, setMessages] = useState<Message[]>([]);
+    const [threadId, setThreadId] = useState<string>('');
 
-    const addUserMessage = (content: string) => {
+    const addUserMessage = async (content: string) => {
+        // Add the user message in the state
         const newMessage: Message = {
             content: content,
             role: "user",
             id: makeId("usr")
         };
         setMessages(prevMessages => [...prevMessages, newMessage]);
+
+        // Create an openai thread if it doesn't exist
+        let currentThreadId = threadId;
+        if (!currentThreadId) {
+            const thread = await createThread({});
+            if (thread !== null) {
+                setThreadId(thread.id);
+                currentThreadId = thread.id;
+            }
+        }
+
+        if (currentThreadId) {
+            // Add the user message to the OpenAI thread
+            await addMessageToThread({
+                threadId: currentThreadId,
+                content: content,
+                role: 'user'
+            });
+
+            // Stream the assistant message
+            const stream = await runAndStream({
+                threadId: currentThreadId,
+                assistant_id: "asst_kzpY41zzrEYrEL0NU4OCJLZn",
+            });
+
+            if (stream) {
+                await streamAssistantMessage(stream);
+            }
+        } else {
+            console.error("\n Failed to create a new thread.");
+        }
     };
 
     const addAssistantMessage = (content: string) => {

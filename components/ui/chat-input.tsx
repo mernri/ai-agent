@@ -4,41 +4,17 @@ import { Button } from "@/components/ui/button"
 import { FormEvent, useState } from "react"
 import { PaperAirplaneIcon } from "@heroicons/react/20/solid"
 import { useMessagesContext } from "@/context/MessagesProvider"
-import { addMessageToThread, listThreadMessages, runThread, runAndStream } from "@/utils/api-helpers/openai"
-import { useOpenaiContext } from "@/context/OpenaiProvider";
 
 export const ChatInput = () => {
     const [inputValue, setInputValue] = useState("")
-    const { addUserMessage, streamAssistantMessage } = useMessagesContext();
-    const { threadId } = useOpenaiContext();
-
+    const { addUserMessage } = useMessagesContext();
 
     const handleSendMessage = async (e: FormEvent) => {
         e.preventDefault()
         if (inputValue.trim() === "") return
 
-        // Add the user message to the context
         addUserMessage(inputValue)
         setInputValue("")
-
-        // Add the user message to the thread
-        addMessageToThread({
-            threadId,
-            content: inputValue,
-            role: 'user'
-        })
-
-        const threadMessages = await listThreadMessages(threadId)
-
-        const stream = await runAndStream({
-            threadId: threadId,
-            assistant_id: "asst_kzpY41zzrEYrEL0NU4OCJLZn",
-        });
-
-        if (stream) {
-            await streamAssistantMessage(stream);
-        }
-
     }
 
     return (
@@ -51,7 +27,7 @@ export const ChatInput = () => {
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault(); // Prevents adding a new line in the textarea
+                        e.preventDefault();
                         handleSendMessage(e);
                     }
                 }}

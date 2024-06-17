@@ -27,8 +27,6 @@ import {
     CompanyNewsResponse,
     SecFilingResponse
 } from "@/lib/tools/tools_types"
-import { useOpenaiContext } from "@/context/OpenaiProvider"
-import { createThread, addMessageToThread, fetchThread } from "@/utils/api-helpers/openai"
 
 export function Search() {
     const [selectedSymbol, setSelectedSymbol] = useState<string>("")
@@ -39,7 +37,6 @@ export function Search() {
     const [companyNews, setCompanyNews] = useState<CompanyNewsResponse | null>(null);
     const [secFiling, setSecFiling] = useState<SecFilingResponse | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const { threadId, setThreadId } = useOpenaiContext();
 
 
     const handleSubmit = async (e: FormEvent) => {
@@ -53,16 +50,6 @@ export function Search() {
         //     handleCompanyNews(selectedSymbol)
         //     handleSecFiling(selectedSymbol, "10-K")
         // }
-
-        if (!threadId) {
-            const thread = await createThread({});
-            thread !== null && setThreadId(thread.id);
-            console.log("\n\n data: ", thread, "\n\n");
-        }
-        else {
-            console.log("\n\n existing threadId: ", threadId, "\n\n");
-        }
-
     };
 
 
