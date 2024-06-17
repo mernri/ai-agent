@@ -7,13 +7,20 @@ import {
     SecFilingResponse
 } from "@/lib/tools/tools_types"
 
+
+
 export const TOOLS_NAMES = {
-    "get_company_profile_tool": fetchCompanyProfile,
-    "get_company_news_tool": fetchCompanyNews,
-    "get_basic_financials_tools": fetchBasicFinancials,
-    "get_income_statement_tool": fetchIncomeStatement,
-    "get_10k_section_tool": fetchSecSection,
-    "get_sec_filing_tool": fetchSecFiling
+    "say_hello_tool": say_hello,
+    // "get_company_profile_tool": fetchCompanyProfile,
+    // "get_company_news_tool": fetchCompanyNews,
+    // "get_basic_financials_tools": fetchBasicFinancials,
+    // "get_income_statement_tool": fetchIncomeStatement,
+    // "get_10k_section_tool": fetchSecSection,
+    // "get_sec_filing_tool": fetchSecFiling
+}
+
+export function say_hello() {
+    return `Hello, Code 4555!`
 }
 
 export async function fetchIncomeStatement(symbol: string): Promise<IncomeStatementResponse> {

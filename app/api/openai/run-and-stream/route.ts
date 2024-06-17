@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { initOpenaiClient } from "@/app/utils/init";
 import { OpenAI } from 'openai';
 
-// POST /api/openai/run-and-stream
 export async function POST(req: NextRequest) {
     try {
         const {
@@ -30,7 +29,7 @@ export async function POST(req: NextRequest) {
         const response = new NextResponse(
             new ReadableStream({
                 async start(controller) {
-                    const runStream = await client.beta.threads.runs.stream(threadId, {
+                    const runStream = client.beta.threads.runs.stream(threadId, {
                         assistant_id,
                         model,
                         instructions,
@@ -60,15 +59,7 @@ export async function POST(req: NextRequest) {
                             controller.error(error);
                         });
                 },
-            }),
-            {
-                headers: {
-                    'Content-Type': 'text/event-stream',
-                    'Cache-Control': 'no-cache',
-                    'Connection': 'keep-alive',
-                    'Access-Control-Allow-Origin': '*',
-                },
-            }
+            })
         );
 
         return response;

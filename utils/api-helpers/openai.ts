@@ -43,32 +43,6 @@ export const createThread = async (params: Partial<OpenAI.Beta.Threads.ThreadCre
     }
 };
 
-export const addMessageToThread = async (params: {
-    threadId: string;
-    content: string;
-    role: 'assistant' | 'user';
-    attachment?: OpenAI.Beta.Threads.MessageCreateParams.Attachment;
-}): Promise<OpenAI.Beta.Threads.Message | null> => {
-    try {
-        const response = await fetch('/api/openai/add-message-to-thread', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(params),
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data: OpenAI.Beta.Threads.Message = await response.json();
-        return data;
-    } catch (error) {
-        console.error(`\n❌ Failed to add message to thread: ${error}`);
-        return null;
-    }
-};
 
 export const fetchThread = async (threadId: string): Promise<OpenAI.Beta.Threads.Thread | null> => {
     try {
@@ -112,28 +86,14 @@ export const listThreadMessages = async (threadId: string): Promise<OpenAI.Beta.
     }
 };
 
-
-export const runThread = async (params: {
-    threadId: string,
-    assistant_id: string,
-    model?: string,
-    instructions?: string | null,
-    additional_instructions?: string | null,
-    additional_messages?: any[] | null,
-    tools?: any[] | null,
-    metadata?: Record<string, any>,
-    temperature?: number | null,
-    top_p?: number | null,
-    stream?: boolean | null,
-    max_prompt_tokens?: number | null,
-    max_completion_tokens?: number | null,
-    truncation_strategy?: any,
-    tool_choice?: string | any,
-    parallel_tool_calls?: boolean,
-    response_format?: string | any
-}): Promise<any> => {
+export const addMessageToThread = async (params: {
+    threadId: string;
+    content: string;
+    role: 'assistant' | 'user';
+    attachment?: OpenAI.Beta.Threads.MessageCreateParams.Attachment;
+}): Promise<OpenAI.Beta.Threads.Message | null> => {
     try {
-        const response = await fetch('/api/openai/run-thread', {
+        const response = await fetch('/api/openai/add-message-to-thread', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -145,9 +105,10 @@ export const runThread = async (params: {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        return await response.json();
+        const data: OpenAI.Beta.Threads.Message = await response.json();
+        return data;
     } catch (error) {
-        console.error(`\n❌ Failed to create a run: ${error}`);
+        console.error(`\n❌ Failed to add message to thread: ${error}`);
         return null;
     }
 };
@@ -208,3 +169,70 @@ export const runAndStream = async (params: {
         return null;
     }
 };
+
+
+export async function fetchThreadRuns(threadId: string) {
+    try {
+        const response = await fetch(`/api/openai/fetch-thread-runs?threadId=${threadId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data.data;
+    } catch (error) {
+        console.error('\n❌ Failed to fetch thread runs:', error);
+    }
+}
+
+
+export async function cancelRun(threadId: string, runId: string) {
+    try {
+        const response = await fetch(`/api/openai/cancel-run?threadId=${threadId}&runId=${runId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log(' Run canceled successfully:', data);
+        return data;
+    } catch (error) {
+        console.error('\n❌ Failed to cancel run:', error);
+    }
+}
+
+
+
+export async function fetchRun(threadId: string, runId: string) {
+    try {
+        const response = await fetch(`/api/openai/fetch-run?threadId=${threadId}&runId=${runId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Run fetched successfully:', data);
+        return data;
+    } catch (error) {
+        console.error('Failed to fetch run:', error);
+    }
+}
+

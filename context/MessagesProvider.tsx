@@ -1,7 +1,7 @@
 "use client"
 import { createContext, useState, useContext } from 'react';
 import { makeId } from '@/utils/index';
-import { addMessageToThread, createThread, runAndStream } from "@/utils/api-helpers/openai"
+import { addMessageToThread, createThread, runAndStream, fetchThreadRuns } from "@/utils/api-helpers/openai"
 
 interface Message {
     content: string,
@@ -31,16 +31,19 @@ export function MessagesProvider({ children }: { children: React.ReactNode }) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [threadId, setThreadId] = useState<string>('');
 
+    const assistant_id = process.env.NEXT_PUBLIC_OPENAI_ASSISTANT_ID;
+
     const addUserMessage = async (content: string) => {
-        // Add the user message in the state
+        // ADD A NEW USER MESSAGE TO THE UI (state)
         const newMessage: Message = {
             content: content,
             role: "user",
             id: makeId("usr")
         };
+
         setMessages(prevMessages => [...prevMessages, newMessage]);
 
-        // Create an openai thread if it doesn't exist
+        // CREATE A NEW THREAD IF THERE ISN'T ONE
         let currentThreadId = threadId;
         if (!currentThreadId) {
             const thread = await createThread({});
@@ -50,18 +53,18 @@ export function MessagesProvider({ children }: { children: React.ReactNode }) {
             }
         }
 
-        if (currentThreadId) {
-            // Add the user message to the OpenAI thread
+        if (currentThreadId && assistant_id) {
+            // ADD THE USER MESSAGE TO THE OPENAI THREAD
             await addMessageToThread({
                 threadId: currentThreadId,
                 content: content,
                 role: 'user'
             });
 
-            // Stream the assistant message
+            // STREAM THE ASSISTANT RESPONSE
             const stream = await runAndStream({
                 threadId: currentThreadId,
-                assistant_id: "asst_kzpY41zzrEYrEL0NU4OCJLZn",
+                assistant_id: assistant_id,
             });
 
             if (stream) {

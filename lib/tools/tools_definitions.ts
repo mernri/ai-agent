@@ -16,6 +16,19 @@ const get_company_profile_tool = {
     }
 }
 
+const say_hello_tool = {
+    "type": 'function',
+    "function": {
+        "name": 'say_hello',
+        "description": 'Returns a greeting message.',
+        "parameters": {
+            "type": 'object',
+            "properties": {},
+            "required": []
+        }
+    }
+}
+
 
 const get_company_news_tool = {
     "type": "function",
