@@ -1,6 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { initOpenaiClient } from "@/app/utils/init";
 import { OpenAI } from 'openai';
+import { TOOLS_NAMES } from '@/lib/tools/tools_calls';
+
+const handleToolCallCreated = (toolCall: OpenAI.Beta.Threads.Runs.FunctionToolCall) => {
+    console.log(`\n🛠 Tool call created - tool call id: ${toolCall.id}`);
+}
+
+const handleToolCallDelta = (toolCallDelta: OpenAI.Beta.Threads.Runs.FunctionToolCallDelta, snapshot: any) => {
+    if (toolCallDelta.function) {
+        const { name: functionName, arguments: argumentsStr, output: functionOutput } = toolCallDelta.function;
+
+        // Convert arguments string to array
+        let functionArguments: any[] = [];
+        if (argumentsStr) {
+            try {
+                functionArguments = JSON.parse(argumentsStr);
+            } catch (error) {
+                console.error("Error parsing arguments: ", error);
+            }
+        }
+
+        // Vérifiez que functionName est défini et que c'est une clé dans TOOLS_NAMES
+        if (functionName && functionName in TOOLS_NAMES) {
+            const toolFunction = TOOLS_NAMES[functionName];
+            const output = toolFunction(...functionArguments);
+            console.log(`\n🛠 Tool call delta - function output: ${output}`);
+
+
+        }
+
+
+
+        console.log(`\n🛠 Tool call delta - function name: ${functionName}`);
+        console.log(`\n🛠 Tool call delta - function arguments : ${functionArguments}`);
+        console.log(`\n🛠 Tool call delta - function output: ${functionOutput}`);
+    }
+}
+
 
 export async function POST(req: NextRequest) {
     try {
@@ -57,7 +94,13 @@ export async function POST(req: NextRequest) {
                         .on('error', (error) => {
                             console.error(`\n❌ Streaming error: ${error}`);
                             controller.error(error);
-                        });
+                        })
+                        .on("toolCallCreated", (toolCall) => {
+                            toolCall.type === "function" && handleToolCallCreated(toolCall)
+                        })
+                        .on("toolCallDelta", (toolCallDelta, snapshot) => {
+                            toolCallDelta.type === "function" && handleToolCallDelta(toolCallDelta, snapshot)
+                        })
                 },
             })
         );

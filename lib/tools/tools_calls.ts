@@ -8,8 +8,12 @@ import {
 } from "@/lib/tools/tools_types"
 
 
+type ToolFunction = (...args: any[]) => any;
+interface ToolsNames {
+    [key: string]: ToolFunction;
+}
 
-export const TOOLS_NAMES = {
+export const TOOLS_NAMES: ToolsNames = {
     "say_hello_tool": say_hello,
     // "get_company_profile_tool": fetchCompanyProfile,
     // "get_company_news_tool": fetchCompanyNews,
