@@ -8,22 +8,37 @@ export const Chat = () => {
 
     React.useEffect(() => {
         if (endOfMessagesRef.current) {
-            endOfMessagesRef.current.scrollIntoView({ behavior: 'smooth' });
+            endOfMessagesRef.current.scrollIntoView();
         }
+
     }, [messages]);
 
     return (
         <div className="flex flex-col w-full justify-between h-full px-2">
-            <div className="flex flex-col gap-4 overflow-auto">
-                {messages.map((message, index) => (
-                    <div key={index} className="flex flex-row justify-end w-full">
-                        <div className="rounded-lg text-right bg-gray-100 p-4 text-xs">
-                            {message.content}
-                        </div>
-                    </div>
-                ))}
+            <div className="flex flex-col overflow-auto">
+                {messages.map((message, index) => {
+                    if (message.role === 'assistant') {
+                        return (
+                            <div key={index} className="flex flex-row justify-start w-full">
+                                <div className="text-justify py-4 text-base">
+                                    {message.content}
+                                </div>
+                            </div>
+                        )
+                    }
+                    else {
+                        return (
+                            <div key={index} className="flex flex-row justify-end w-full">
+                                <div className="rounded-lg text-right bg-gray-100 p-4 text-base	">
+                                    {message.content}
+                                </div>
+                            </div>
+                        )
+                    }
+
+                })}
                 {/* invisible element : scroll target ref */}
-                <div ref={endOfMessagesRef} />
+                <div ref={endOfMessagesRef} className="pb-6" />
             </div>
         </div>
     );

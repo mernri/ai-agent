@@ -13,7 +13,7 @@ const ScrollArea = React.forwardRef<
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const viewport = e.currentTarget;
-    const offset = 100
+    const offset = 50
     const isAtBottom = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight <= offset;
     if (!isAtBottom && withScrollDownButton) {
       setShowScrollToBottom(true);
