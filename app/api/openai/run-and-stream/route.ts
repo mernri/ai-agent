@@ -30,11 +30,6 @@ const handleToolCallDelta = (toolCallDelta: OpenAI.Beta.Threads.Runs.FunctionToo
 
         }
 
-
-
-        console.log(`\n🛠 Tool call delta - function name: ${functionName}`);
-        console.log(`\n🛠 Tool call delta - function arguments : ${functionArguments}`);
-        console.log(`\n🛠 Tool call delta - function output: ${functionOutput}`);
     }
 }
 
