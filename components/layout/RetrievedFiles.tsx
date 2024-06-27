@@ -122,7 +122,7 @@ export function RetrievedFiles({ symbol }: RetrievedFilesProps) {
     if (!symbol) return null;
 
     return (
-        <div className="space-y-4 ml-4">
+        <div className="space-y-4 ml-3">
             <Accordion type="single" collapsible className="w-full">
                 {companyProfile && (
                     <AccordionItem value="company-profile">

@@ -122,7 +122,7 @@ export const CustomTable = ({ title, content_dict, rows, cols }: CustomTableProp
                     onChange={(event) =>
                         table.getColumn("metric")?.setFilterValue(event.target.value)
                     }
-                    className="max-w-sm"
+                    className="max-w-sm ml-1"
                 />
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
