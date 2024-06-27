@@ -134,7 +134,7 @@ export function RetrievedFiles({ symbol }: RetrievedFilesProps) {
                             />
                         </AccordionTrigger>
                         <AccordionContent>
-                            <div className="max-h-[300px] overflow-y-auto">
+                            <div className="overflow-y-auto">
                                 <pre className="whitespace-pre-wrap text-justify">{he.decode(companyProfile.company_profile)}</pre>
                             </div>
                         </AccordionContent>
@@ -151,7 +151,7 @@ export function RetrievedFiles({ symbol }: RetrievedFilesProps) {
                             />
                         </AccordionTrigger>
                         <AccordionContent>
-                            <div className="max-h-[300px] overflow-y-auto">
+                            <div className="overflow-y-auto">
                                 <CustomTable
                                     title={`Income statement for ${symbol}`}
                                     content_dict={incomeStatement.income_statement}
@@ -173,7 +173,7 @@ export function RetrievedFiles({ symbol }: RetrievedFilesProps) {
                             />
                         </AccordionTrigger>
                         <AccordionContent>
-                            <div className="max-h-[300px] overflow-y-auto">
+                            <div className="overflow-y-auto">
                                 <pre className="whitespace-pre-wrap text-justify">{he.decode(secSection.section_text)}</pre>
                             </div>
                         </AccordionContent>
@@ -190,7 +190,7 @@ export function RetrievedFiles({ symbol }: RetrievedFilesProps) {
                             />
                         </AccordionTrigger>
                         <AccordionContent>
-                            <div className="max-h-[300px] overflow-y-auto">
+                            <div className="overflow-y-auto">
                                 <CustomTable
                                     title={`Basic Financials for ${symbol}`}
                                     content_dict={{ value: basicFinancials.financials }}
@@ -212,7 +212,7 @@ export function RetrievedFiles({ symbol }: RetrievedFilesProps) {
                             />
                         </AccordionTrigger>
                         <AccordionContent>
-                            <div className="max-h-[300px] overflow-y-auto space-y-4">
+                            <div className="overflow-y-auto space-y-4">
                                 {companyNews.news.map((news, index) => (
                                     <div key={index} className="p-4 border border-gray-200 rounded-md flex justify-between gap-4 align-start">
                                         <div>
@@ -243,7 +243,7 @@ export function RetrievedFiles({ symbol }: RetrievedFilesProps) {
                             />
                         </AccordionTrigger>
                         <AccordionContent>
-                            <div className="max-h-[300px] overflow-y-auto">
+                            <div className="overflow-y-auto">
                                 <div className="p-4 border border-gray-200 rounded-md flex justify-between gap-4 align-start">
                                     <div>
                                         <h3 className="font-semibold">SEC Filing for {symbol} - {secFiling.filing.form}</h3>
