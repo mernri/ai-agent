@@ -12,7 +12,7 @@ interface BlurIntProps {
     };
     duration?: number;
 }
-const BlurIn = ({ word, icon, className, variant, duration = 1 }: BlurIntProps) => {
+export const BlurIn = ({ word, icon, className, variant, duration = 1 }: BlurIntProps) => {
     const defaultVariants = {
         hidden: { filter: "blur(10px)", opacity: 0 },
         visible: { filter: "blur(0px)", opacity: 1 },
@@ -34,5 +34,3 @@ const BlurIn = ({ word, icon, className, variant, duration = 1 }: BlurIntProps) 
         </motion.h1>
     );
 };
-
-export default BlurIn;

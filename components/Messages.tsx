@@ -1,10 +1,10 @@
 "use client"
 import * as React from "react";
-import { useMessagesContext } from "@/context/MessagesProvider";
+import { useChatContext } from "@/context/ChatProvider";
 import he from 'he';
 
-export const Chat = () => {
-    const { messages } = useMessagesContext();
+export const Messages = () => {
+    const { messages } = useChatContext();
     const endOfMessagesRef = React.useRef<HTMLDivElement>(null);
 
     React.useEffect(() => {
@@ -38,11 +38,11 @@ export const Chat = () => {
                     }
 
                 })}
-                {/* invisible element : scroll target ref */}
                 <div ref={endOfMessagesRef} className="pb-6" />
             </div>
+
         </div>
     );
 };
 
-export default Chat;
+export default Messages;

@@ -3,11 +3,11 @@ import { AutosizeTextarea } from "@/components/ui/autosize-text-area"
 import { Button } from "@/components/ui/button"
 import { FormEvent, useState } from "react"
 import { PaperAirplaneIcon } from "@heroicons/react/20/solid"
-import { useMessagesContext } from "@/context/MessagesProvider"
+import { useChatContext } from "@/context/ChatProvider"
 
 export const ChatInput = () => {
     const [inputValue, setInputValue] = useState("")
-    const { addUserMessage } = useMessagesContext();
+    const { addUserMessage } = useChatContext();
 
     const handleSendMessage = async (e: FormEvent) => {
         e.preventDefault()

@@ -1,7 +1,7 @@
 "use client"
 import { createContext, useState, useContext } from 'react';
 import { makeId } from '@/utils/index';
-import { addMessageToThread, createThread, runAndStream, fetchThreadRuns } from "@/utils/api-helpers/openai"
+import { addMessageToThread, createThread, runAndStream } from "@/utils/api-helpers/openai"
 
 interface Message {
     content: string,
@@ -9,7 +9,7 @@ interface Message {
     id: string
 }
 
-interface MessagesContextType {
+interface ChatContextType {
     messages: Message[];
     setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
     addUserMessage: (content: string) => void;
@@ -18,7 +18,7 @@ interface MessagesContextType {
 }
 
 // Step 1 : Create the context 
-const MessagesContext = createContext<MessagesContextType>({
+const ChatContext = createContext<ChatContextType>({
     messages: [],
     setMessages: () => { },
     addUserMessage: () => { },
@@ -27,7 +27,7 @@ const MessagesContext = createContext<MessagesContextType>({
 });
 
 // Step 2 : Create the context wrapper (the provider)
-export function MessagesProvider({ children }: { children: React.ReactNode }) {
+export function ChatProvider({ children }: { children: React.ReactNode }) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [threadId, setThreadId] = useState<string>('');
 
@@ -106,7 +106,7 @@ export function MessagesProvider({ children }: { children: React.ReactNode }) {
     };
 
     return (
-        <MessagesContext.Provider value={{
+        <ChatContext.Provider value={{
             messages,
             setMessages,
             addUserMessage,
@@ -114,11 +114,11 @@ export function MessagesProvider({ children }: { children: React.ReactNode }) {
             streamAssistantMessage
         }}>
             {children}
-        </MessagesContext.Provider>
+        </ChatContext.Provider>
     );
 }
 
 // Step 3 : Create the custom hook I can use to access the context (the consumer)
-export function useMessagesContext() {
-    return useContext(MessagesContext);
+export function useChatContext() {
+    return useContext(ChatContext);
 }

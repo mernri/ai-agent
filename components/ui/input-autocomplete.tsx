@@ -2,32 +2,37 @@ import React, { useState, useEffect } from 'react';
 import { useSymbolSearch } from '@/hooks/useSymbolSearch';
 import { Input } from "@/components/ui/input";
 
-const InputSymbolAutocomplete = ({ handleSelectSymbol }: { handleSelectSymbol: any }) => {
+const InputSymbolAutocomplete = ({ handleSelectSymbol }: { handleSelectSymbol: (symbol: string) => void }) => {
     const [input, setInput] = useState('');
+    const [selectedSymbol, setSelectedSymbol] = useState('');
     const { stocks, isLoading, error } = useSymbolSearch(input);
     const [displaySymbolsList, setDisplaySymbolsList] = useState(false);
 
-
     useEffect(() => {
-        if (input.length > 0 && stocks.length > 0) {
-            setDisplaySymbolsList(true);
-        } else {
-            setDisplaySymbolsList(false);
-        }
-    }, [input.length]);
+        setDisplaySymbolsList(input.length > 0 && stocks.length > 0 && input !== selectedSymbol);
+    }, [input, stocks, selectedSymbol]);
 
     const handleSelectStock = (ticker: string) => {
         setInput(ticker);
+        setSelectedSymbol(ticker);
         handleSelectSymbol(ticker);
         setDisplaySymbolsList(false);
+    }
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newInput = e.target.value;
+        setInput(newInput);
+        if (newInput !== selectedSymbol) {
+            setSelectedSymbol('');
+        }
     }
 
     return (
         <div className="relative w-full">
             <Input
                 value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onFocus={() => setDisplaySymbolsList(input.length > 0 && stocks.length > 0)}
+                onChange={handleInputChange}
+                onFocus={() => setDisplaySymbolsList(input.length > 0 && stocks.length > 0 && input !== selectedSymbol)}
                 placeholder="company symbol (Ex: AAPL for Apple)"
                 className="w-full"
             />

@@ -1,14 +1,13 @@
 "use client"
-
 import { FormEvent, useState } from "react"
 import InputSymbolAutocomplete from "@/components/ui/input-autocomplete"
 import { Button } from "@/components/ui/button"
 
-interface SearchProps {
+interface SearchBarProps {
     onSymbolSelect: (symbol: string) => void;
 }
 
-export function Search({ onSymbolSelect }: SearchProps) {
+export function SearchBar({ onSymbolSelect }: SearchBarProps) {
     const [selectedSymbol, setSelectedSymbol] = useState<string>("")
 
     const handleSubmit = (e: FormEvent) => {

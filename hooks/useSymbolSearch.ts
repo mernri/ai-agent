@@ -11,8 +11,6 @@ export const useSymbolSearch = (searchQuery: string) => {
     const [stocks, setStocks] = useState<Stock[]>([]);
     const [error, setError] = useState<string | null>(null);
 
-
-
     useEffect(() => {
         if (!searchQuery) {
             setStocks([]);
@@ -35,7 +33,7 @@ export const useSymbolSearch = (searchQuery: string) => {
 
                 const data: Stock[] = await response.json();
 
-                // Utilisation de reduce pour filtrer les doublons
+                // Utilisation de reduce car il y a des doublons dans la réponse
                 const uniqueStocks = data.reduce<Stock[]>((acc, stock) => {
                     if (!acc.some(item => item.ticker === stock.ticker)) {
                         acc.push(stock);

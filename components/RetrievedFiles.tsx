@@ -1,17 +1,14 @@
 "use client"
-
 import { useState, useEffect } from "react"
 import { CustomTable } from "@/components/ui/custom-table"
-import he from 'he';
 import { formatUglyDate } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { CheckCircleIcon } from "@heroicons/react/20/solid"
-import BlurIn from "@/components/ui/text/blur-in"
-import { BlurInTextWithCollapsible } from "@/components/ui/blurin-text-with-collapsible"
+import { BlurIn } from "@/components/ui/text/blur-in"
+import he from 'he';
 
 import {
     fetchIncomeStatement,
-    fetchSecSection,
     fetchBasicFinancials,
     fetchCompanyProfile,
     fetchCompanyNews,
@@ -20,7 +17,6 @@ import {
 
 import {
     IncomeStatementResponse,
-    SecSectionResponse,
     BasicFinancialsResponse,
     CompanyProfileResponse,
     CompanyNewsResponse,
@@ -34,90 +30,48 @@ interface RetrievedFilesProps {
 
 export function RetrievedFiles({ symbol }: RetrievedFilesProps) {
     const [incomeStatement, setIncomeStatement] = useState<IncomeStatementResponse | null>(null);
-    const [secSection, setSecSection] = useState<SecSectionResponse | null>(null);
     const [basicFinancials, setBasicFinancials] = useState<BasicFinancialsResponse | null>(null);
     const [companyProfile, setCompanyProfile] = useState<CompanyProfileResponse | null>(null);
     const [companyNews, setCompanyNews] = useState<CompanyNewsResponse | null>(null);
     const [secFiling, setSecFiling] = useState<SecFilingResponse | null>(null);
     const [error, setError] = useState<string | null>(null);
 
+    const handleFetch = async (fetchFunc: Function, setDataFunc: Function, ...args: any[]) => {
+        try {
+            const result = await fetchFunc(...args);
+            setDataFunc(result);
+            setError(null);
+        } catch (err: any) {
+            setError(err.message);
+            setDataFunc(null);
+        }
+    };
+
+    const handleIncomeStatement = (symbol: string) =>
+        handleFetch(fetchIncomeStatement, setIncomeStatement, symbol);
+
+    const handleBasicFinancials = (symbol: string, selectedColumns?: string[]) =>
+        handleFetch(fetchBasicFinancials, setBasicFinancials, symbol, selectedColumns);
+
+    const handleCompanyProfile = (symbol: string) =>
+        handleFetch(fetchCompanyProfile, setCompanyProfile, symbol);
+
+    const handleCompanyNews = (symbol: string, start_date?: string, end_date?: string, max_news_num: number = 10) =>
+        handleFetch(fetchCompanyNews, setCompanyNews, symbol, start_date, end_date, max_news_num);
+
+    const handleSecFiling = (symbol: string, form?: string, fromDate?: string, toDate?: string) =>
+        handleFetch(fetchSecFiling, setSecFiling, symbol, form, fromDate, toDate);
+
+
     useEffect(() => {
         if (symbol) {
             handleCompanyProfile(symbol);
-            handleFetchIncomeStatement(symbol);
-            // handleFetchSecSection(symbol, "7");
-            handleBasicFinancials(symbol, ['revenueTTm', 'debtEquityTTM', 'peRatioTTM',
-                'pegRatioTTM', 'priceToBookTTM', 'priceToSalesTTM', 'dividendYieldTTM', 'roeTTM']);
+            handleIncomeStatement(symbol);
+            handleBasicFinancials(symbol, ['revenueTTm', 'debtEquityTTM', 'peRatioTTM', 'pegRatioTTM', 'priceToBookTTM', 'priceToSalesTTM', 'dividendYieldTTM', 'roeTTM']);
             handleCompanyNews(symbol);
             handleSecFiling(symbol, "10-K");
         }
     }, [symbol]);
-
-    const handleFetchIncomeStatement = async (symbol: string) => {
-        try {
-            const data = await fetchIncomeStatement(symbol);
-            setIncomeStatement(data);
-            setError(null);
-        } catch (err: any) {
-            setError(err.message);
-            setIncomeStatement(null);
-        }
-    };
-
-    const handleFetchSecSection = async (ticker_symbol: string, section: string, fyear?: string, report_address?: string) => {
-        try {
-            const result = await fetchSecSection(ticker_symbol, section, fyear, report_address);
-            setSecSection(result);
-            setError(null);
-        } catch (err: any) {
-            setError(err.message);
-            setSecSection(null);
-        }
-    };
-
-    const handleBasicFinancials = async (symbol: string, selectedColumns?: string[]) => {
-        try {
-            const result = await fetchBasicFinancials(symbol, selectedColumns);
-            setBasicFinancials(result);
-            setError(null);
-        } catch (err: any) {
-            setError(err.message);
-            setBasicFinancials(null);
-        }
-    };
-
-    const handleCompanyProfile = async (symbol: string) => {
-        try {
-            const result = await fetchCompanyProfile(symbol);
-            setCompanyProfile(result);
-            setError(null);
-        } catch (err: any) {
-            setError(err.message);
-            setCompanyProfile(null);
-        }
-    }
-
-    const handleCompanyNews = async (symbol: string, start_date?: string, end_date?: string, max_news_num: number = 10) => {
-        try {
-            const result = await fetchCompanyNews(symbol, start_date, end_date, max_news_num);
-            setCompanyNews(result);
-            setError(null);
-        } catch (err: any) {
-            setError(err.message);
-            setCompanyNews(null);
-        }
-    }
-
-    const handleSecFiling = async (symbol: string, form?: string, fromDate?: string, toDate?: string) => {
-        try {
-            const result = await fetchSecFiling(symbol, form, fromDate, toDate);
-            setSecFiling(result);
-            setError(null);
-        } catch (err: any) {
-            setError(err.message);
-            setSecFiling(null);
-        }
-    }
 
     if (!symbol) return null;
 
@@ -163,22 +117,6 @@ export function RetrievedFiles({ symbol }: RetrievedFilesProps) {
                     </AccordionItem>
                 )}
 
-                {secSection && (
-                    <AccordionItem value="sec-section">
-                        <AccordionTrigger>
-                            <BlurIn
-                                icon={<CheckCircleIcon width='20' />}
-                                word={`Retrieved section ${secSection.section} from 10-k sec filing ${secSection.fiscal_year}`}
-                                className="text-sm text-start text-black dark:text-white"
-                            />
-                        </AccordionTrigger>
-                        <AccordionContent>
-                            <div className="overflow-y-auto">
-                                <pre className="whitespace-pre-wrap text-justify">{he.decode(secSection.section_text)}</pre>
-                            </div>
-                        </AccordionContent>
-                    </AccordionItem>
-                )}
 
                 {basicFinancials && (
                     <AccordionItem value="basic-financials">
