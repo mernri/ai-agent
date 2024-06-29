@@ -1,11 +1,11 @@
-"use client"
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { CustomTable } from "@/components/ui/custom-table"
 import { formatUglyDate } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { CheckCircleIcon } from "@heroicons/react/20/solid"
+import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/20/solid"
 import { BlurIn } from "@/components/ui/text/blur-in"
 import he from 'he';
+import { cn } from "@/lib/utils";
 
 import {
     fetchIncomeStatement,
@@ -34,42 +34,27 @@ export function RetrievedFiles({ symbol }: RetrievedFilesProps) {
     const [companyProfile, setCompanyProfile] = useState<CompanyProfileResponse | null>(null);
     const [companyNews, setCompanyNews] = useState<CompanyNewsResponse | null>(null);
     const [secFiling, setSecFiling] = useState<SecFilingResponse | null>(null);
-    const [error, setError] = useState<string | null>(null);
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
-    const handleFetch = async (fetchFunc: Function, setDataFunc: Function, ...args: any[]) => {
+    const handleFetch = async (fetchFunc: Function, setDataFunc: Function, errorKey: string, ...args: any[]) => {
         try {
             const result = await fetchFunc(...args);
             setDataFunc(result);
-            setError(null);
+            setErrors(prev => ({ ...prev, [errorKey]: '' }));
         } catch (err: any) {
-            setError(err.message);
+            console.error(`Error fetching ${errorKey}:`, err);
+            setErrors(prev => ({ ...prev, [errorKey]: err.message || `Failed to fetch ${errorKey}` }));
             setDataFunc(null);
         }
     };
 
-    const handleIncomeStatement = (symbol: string) =>
-        handleFetch(fetchIncomeStatement, setIncomeStatement, symbol);
-
-    const handleBasicFinancials = (symbol: string, selectedColumns?: string[]) =>
-        handleFetch(fetchBasicFinancials, setBasicFinancials, symbol, selectedColumns);
-
-    const handleCompanyProfile = (symbol: string) =>
-        handleFetch(fetchCompanyProfile, setCompanyProfile, symbol);
-
-    const handleCompanyNews = (symbol: string, start_date?: string, end_date?: string, max_news_num: number = 10) =>
-        handleFetch(fetchCompanyNews, setCompanyNews, symbol, start_date, end_date, max_news_num);
-
-    const handleSecFiling = (symbol: string, form?: string, fromDate?: string, toDate?: string) =>
-        handleFetch(fetchSecFiling, setSecFiling, symbol, form, fromDate, toDate);
-
-
     useEffect(() => {
         if (symbol) {
-            handleCompanyProfile(symbol);
-            handleIncomeStatement(symbol);
-            handleBasicFinancials(symbol, ['revenueTTm', 'debtEquityTTM', 'peRatioTTM', 'pegRatioTTM', 'priceToBookTTM', 'priceToSalesTTM', 'dividendYieldTTM', 'roeTTM']);
-            handleCompanyNews(symbol);
-            handleSecFiling(symbol, "10-K");
+            handleFetch(fetchCompanyProfile, setCompanyProfile, 'companyProfile', symbol);
+            handleFetch(fetchIncomeStatement, setIncomeStatement, 'incomeStatement', symbol);
+            handleFetch(fetchBasicFinancials, setBasicFinancials, 'basicFinancials', symbol, ['revenueTTm', 'debtEquityTTM', 'peRatioTTM', 'pegRatioTTM', 'priceToBookTTM', 'priceToSalesTTM', 'dividendYieldTTM', 'roeTTM']);
+            handleFetch(fetchCompanyNews, setCompanyNews, 'companyNews', symbol);
+            handleFetch(fetchSecFiling, setSecFiling, 'secFiling', symbol, "10-K");
         }
     }, [symbol]);
 
@@ -77,130 +62,98 @@ export function RetrievedFiles({ symbol }: RetrievedFilesProps) {
 
     return (
         <div className="space-y-4 ml-3">
-            <Accordion type="single" collapsible className="w-full">
-                {companyProfile && (
-                    <AccordionItem value="company-profile">
-                        <AccordionTrigger>
-                            <BlurIn
-                                icon={<CheckCircleIcon width='20' />}
-                                word={`Company profile extracted successfully`}
-                                className="text-sm text-start text-black dark:text-white"
-                            />
-                        </AccordionTrigger>
-                        <AccordionContent>
-                            <div className="overflow-y-auto">
-                                <pre className="whitespace-pre-wrap text-justify">{he.decode(companyProfile.company_profile)}</pre>
-                            </div>
-                        </AccordionContent>
-                    </AccordionItem>
-                )}
+            <Accordion type="single" collapsible className="w-full" defaultValue="company-profile">
+                {renderAccordionItem('company-profile', 'Company profile', companyProfile, errors.companyProfile, () => (
+                    <div className="overflow-y-auto">
+                        <pre className="whitespace-pre-wrap text-justify">{he.decode(companyProfile?.company_profile || '')}</pre>
+                    </div>
+                ))}
 
-                {incomeStatement && (
-                    <AccordionItem value="income-statement">
-                        <AccordionTrigger>
-                            <BlurIn
-                                icon={<CheckCircleIcon width='20' />}
-                                word={`Retrieved last income statement`}
-                                className="text-sm text-start text-black dark:text-white"
+                {renderAccordionItem('income-statement', 'Income statement', incomeStatement, errors.incomeStatement, () => (
+                    <div className="overflow-y-auto">
+                        {incomeStatement && incomeStatement.income_statement && (
+                            <CustomTable
+                                title={`Income statement for ${symbol}`}
+                                content_dict={incomeStatement.income_statement}
+                                cols={Object.keys(incomeStatement.income_statement)}
+                                rows={Object.keys(incomeStatement.income_statement[Object.keys(incomeStatement.income_statement)[0]] || {})}
                             />
-                        </AccordionTrigger>
-                        <AccordionContent>
-                            <div className="overflow-y-auto">
-                                <CustomTable
-                                    title={`Income statement for ${symbol}`}
-                                    content_dict={incomeStatement.income_statement}
-                                    cols={Object.keys(incomeStatement.income_statement)}
-                                    rows={Object.keys(incomeStatement.income_statement[Object.keys(incomeStatement.income_statement)[0]])}
-                                />
-                            </div>
-                        </AccordionContent>
-                    </AccordionItem>
-                )}
+                        )}
+                    </div>
+                ))}
 
-
-                {basicFinancials && (
-                    <AccordionItem value="basic-financials">
-                        <AccordionTrigger>
-                            <BlurIn
-                                icon={<CheckCircleIcon width='20' />}
-                                word={`Retrieved last financial metrics`}
-                                className="text-sm text-start text-black dark:text-white"
+                {renderAccordionItem('basic-financials', 'Financial metrics', basicFinancials, errors.basicFinancials, () => (
+                    <div className="overflow-y-auto">
+                        {basicFinancials && basicFinancials.financials && (
+                            <CustomTable
+                                title={`Basic Financials for ${symbol}`}
+                                content_dict={{ value: basicFinancials.financials }}
+                                cols={["value"]}
+                                rows={Object.keys(basicFinancials.financials)}
                             />
-                        </AccordionTrigger>
-                        <AccordionContent>
-                            <div className="overflow-y-auto">
-                                <CustomTable
-                                    title={`Basic Financials for ${symbol}`}
-                                    content_dict={{ value: basicFinancials.financials }}
-                                    cols={["value"]}
-                                    rows={Object.keys(basicFinancials.financials)}
-                                />
-                            </div>
-                        </AccordionContent>
-                    </AccordionItem>
-                )}
+                        )}
+                    </div>
+                ))}
 
-                {companyNews && (
-                    <AccordionItem value="company-news">
-                        <AccordionTrigger>
-                            <BlurIn
-                                icon={<CheckCircleIcon width='20' />}
-                                word={`Searching for the ${symbol}'s latest news`}
-                                className="text-sm text-start text-black dark:text-white"
-                            />
-                        </AccordionTrigger>
-                        <AccordionContent>
-                            <div className="overflow-y-auto space-y-4">
-                                {companyNews.news.map((news, index) => (
-                                    <div key={index} className="p-4 border border-gray-200 rounded-md flex justify-between gap-4 align-start">
-                                        <div>
-                                            <h3 className="font-semibold">{news.headline}</h3>
-                                            <p>{news.source} | {formatUglyDate(news.date)}</p>
-                                        </div>
-                                        <div>
-                                            <Button asChild variant="outline">
-                                                <a href={news.url} target="_blank" rel="noopener noreferrer">
-                                                    read article
-                                                </a>
-                                            </Button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </AccordionContent>
-                    </AccordionItem>
-                )}
-
-                {secFiling && (
-                    <AccordionItem value="sec-filing">
-                        <AccordionTrigger>
-                            <BlurIn
-                                icon={<CheckCircleIcon width='20' />}
-                                word={`Fetching ${symbol}'s latest ${secFiling.filing.form} sec filing`}
-                                className="text-sm text-start text-black dark:text-white"
-                            />
-                        </AccordionTrigger>
-                        <AccordionContent>
-                            <div className="overflow-y-auto">
-                                <div className="p-4 border border-gray-200 rounded-md flex justify-between gap-4 align-start">
-                                    <div>
-                                        <h3 className="font-semibold">SEC Filing for {symbol} - {secFiling.filing.form}</h3>
-                                        <p>Accepted on: {secFiling.filing.acceptedDate}</p>
-                                        <p>Filed on: {secFiling.filing.filedDate}</p>
-                                    </div>
-                                    <div>
-                                        <Button asChild variant="outline">
-                                            <a href={secFiling.filing.reportUrl} target="_blank" rel="noopener noreferrer">
-                                                open {secFiling.filing.form} filing
-                                            </a>
-                                        </Button>
-                                    </div>
+                {renderAccordionItem('company-news', 'Latest news', companyNews, errors.companyNews, () => (
+                    <div className="overflow-y-auto space-y-4">
+                        {companyNews && companyNews.news && companyNews.news.map((news, index) => (
+                            <div key={index} className="p-4 border border-gray-200 rounded-md flex justify-between gap-4 align-start">
+                                <div>
+                                    <h3 className="font-semibold">{news.headline}</h3>
+                                    <p>{news.source} | {formatUglyDate(news.date)}</p>
+                                </div>
+                                <div>
+                                    <Button asChild variant="outline">
+                                        <a href={news.url} target="_blank" rel="noopener noreferrer">
+                                            Read article
+                                        </a>
+                                    </Button>
                                 </div>
                             </div>
-                        </AccordionContent>
-                    </AccordionItem>
-                )}
+                        ))}
+                    </div>
+                ))}
+
+                {renderAccordionItem('sec-filing', 'Latest SEC filing', secFiling, errors.secFiling, () => (
+                    <div className="overflow-y-auto">
+                        {secFiling && secFiling.filing && (
+                            <div className="p-4 border border-gray-200 rounded-md flex justify-between gap-4 align-start">
+                                <div>
+                                    <h3 className="font-semibold">SEC Filing for {symbol} - {secFiling.filing.form}</h3>
+                                    <p>Accepted on: {secFiling.filing.acceptedDate}</p>
+                                    <p>Filed on: {secFiling.filing.filedDate}</p>
+                                </div>
+                                <div>
+                                    <Button asChild variant="outline">
+                                        <a href={secFiling.filing.reportUrl} target="_blank" rel="noopener noreferrer">
+                                            Open {secFiling.filing.form} filing
+                                        </a>
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                ))}
             </Accordion>
         </div>
+    )
+}
+
+function renderAccordionItem(value: string, title: string, data: any, error: string | undefined, content: () => JSX.Element) {
+    if (error) return
+
+    return (
+        <AccordionItem value={value}>
+            <AccordionTrigger>
+                <div className="flex gap-2">
+                    <CheckCircleIcon width='20' />
+                    {title}
+                </div>
+            </AccordionTrigger>
+            <AccordionContent>
+                {data ? content() : (<div>Loading...</div>)}
+            </AccordionContent>
+        </AccordionItem>
     )
 }
