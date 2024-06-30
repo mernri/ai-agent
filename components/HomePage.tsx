@@ -16,7 +16,6 @@ import { useAggregatedStockData } from "@/hooks/useStockData";
 const HomePage = () => {
     const [selectedSymbol, setSelectedSymbol] = useState<string>("");
     const isMobile = useIsMobile();
-    const { sendMessage } = useChatContext();
 
     const StockSearchView = () => (
         <div className="flex flex-col items-center justify-center h-full">
@@ -30,7 +29,7 @@ const HomePage = () => {
         </div>
     );
 
-    const StockAnalysisView = () => {
+    const ChatView = () => {
         const { data: stockData, isLoading: isLoadingStock, isError } = useAggregatedStockData(selectedSymbol);
         const { sendMessage, isLoading: isChatLoading } = useChatContext();
 
@@ -91,7 +90,7 @@ const HomePage = () => {
 
     return (
         <main className="flex flex-col h-screen p-4 md:p-12 bg-gray-50">
-            {!selectedSymbol ? <StockSearchView /> : <StockAnalysisView />}
+            {!selectedSymbol ? <StockSearchView /> : <ChatView />}
         </main>
     );
 }
