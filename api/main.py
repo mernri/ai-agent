@@ -22,10 +22,6 @@ app.add_middleware(
     allow_headers=["*"], 
 )
 
-@app.get("/api/py/healthcheck")
-def healthchecker():
-    return {"status": "success", "message": "Successfully called fastAPI healthcheck endpoint!"}
-
 class IncomeStatementResponse(BaseModel):
     symbol: str
     income_statement: dict

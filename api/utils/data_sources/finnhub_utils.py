@@ -68,6 +68,7 @@ class FinnhubUtils:
                 end_date = today()
 
             news = self.finnhub_client.company_news(symbol, _from=start_date, to=end_date)
+            
             if len(news) == 0:
                 print(f"No company news found for symbol {symbol} from finnhub!")
                 
@@ -81,8 +82,8 @@ class FinnhubUtils:
                 }
                 for n in news
             ]
+            
             # Select the 10 most recent news if the number of news exceeds the limit
-            ##TODO : Add a list of priority sources to sort the news
             if len(news) > max_news_num:
                 news = news[:max_news_num]
             news.sort(key=lambda x: x["date"])

@@ -3,6 +3,7 @@ import { CustomTable } from "@/components/ui/custom-table"
 import { formatUglyDate } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { CheckCircleIcon } from "@heroicons/react/20/solid"
+import Image from "next/image";
 import he from 'he';
 
 import {
@@ -33,27 +34,14 @@ export function RetrievedFiles({ symbol }: RetrievedFilesProps) {
     const [companyProfile, setCompanyProfile] = useState<CompanyProfileResponse | null>(null);
     const [companyNews, setCompanyNews] = useState<CompanyNewsResponse | null>(null);
     const [secFiling, setSecFiling] = useState<SecFilingResponse | null>(null);
-    const [errors, setErrors] = useState<Record<string, string>>({});
-
-    const handleFetch = async (fetchFunc: Function, setDataFunc: Function, errorKey: string, ...args: any[]) => {
-        try {
-            const result = await fetchFunc(...args);
-            setDataFunc(result);
-            setErrors(prev => ({ ...prev, [errorKey]: '' }));
-        } catch (err: any) {
-            console.error(`Error fetching ${errorKey}:`, err);
-            setErrors(prev => ({ ...prev, [errorKey]: err.message || `Failed to fetch ${errorKey}` }));
-            setDataFunc(null);
-        }
-    };
 
     useEffect(() => {
         if (symbol) {
-            handleFetch(fetchCompanyProfile, setCompanyProfile, 'companyProfile', symbol);
-            handleFetch(fetchIncomeStatement, setIncomeStatement, 'incomeStatement', symbol);
-            handleFetch(fetchBasicFinancials, setBasicFinancials, 'basicFinancials', symbol, ['revenueTTm', 'debtEquityTTM', 'peRatioTTM', 'pegRatioTTM', 'priceToBookTTM', 'priceToSalesTTM', 'dividendYieldTTM', 'roeTTM']);
-            handleFetch(fetchCompanyNews, setCompanyNews, 'companyNews', symbol);
-            handleFetch(fetchSecFiling, setSecFiling, 'secFiling', symbol, "10-K");
+            fetchCompanyProfile(symbol).then(setCompanyProfile);
+            fetchIncomeStatement(symbol).then(setIncomeStatement);
+            fetchBasicFinancials(symbol, ['revenueTTm', 'debtEquityTTM', 'peRatioTTM', 'pegRatioTTM', 'priceToBookTTM', 'priceToSalesTTM', 'dividendYieldTTM', 'roeTTM']).then(setBasicFinancials);
+            fetchCompanyNews(symbol).then(setCompanyNews);
+            fetchSecFiling(symbol, "10-K").then(setSecFiling);
         }
     }, [symbol]);
 
@@ -62,13 +50,13 @@ export function RetrievedFiles({ symbol }: RetrievedFilesProps) {
     return (
         <div className="space-y-4 ml-3">
             <Accordion type="single" collapsible className="w-full" defaultValue="company-profile">
-                {renderAccordionItem('company-profile', 'Company profile', companyProfile, errors.companyProfile, () => (
+                {renderAccordionItem('company-profile', 'Company profile', companyProfile, () => (
                     <div className="overflow-y-auto">
                         <pre className="whitespace-pre-wrap text-justify">{he.decode(companyProfile?.company_profile || '')}</pre>
                     </div>
                 ))}
 
-                {renderAccordionItem('income-statement', 'Income statement', incomeStatement, errors.incomeStatement, () => (
+                {renderAccordionItem('income-statement', 'Income statement', incomeStatement, () => (
                     <div className="overflow-y-auto">
                         {incomeStatement && incomeStatement.income_statement && (
                             <CustomTable
@@ -81,7 +69,7 @@ export function RetrievedFiles({ symbol }: RetrievedFilesProps) {
                     </div>
                 ))}
 
-                {renderAccordionItem('basic-financials', 'Financial metrics', basicFinancials, errors.basicFinancials, () => (
+                {renderAccordionItem('basic-financials', 'Financial metrics', basicFinancials, () => (
                     <div className="overflow-y-auto">
                         {basicFinancials && basicFinancials.financials && (
                             <CustomTable
@@ -94,16 +82,24 @@ export function RetrievedFiles({ symbol }: RetrievedFilesProps) {
                     </div>
                 ))}
 
-
-
-                {renderAccordionItem('sec-filing', 'Latest SEC filing', secFiling, errors.secFiling, () => (
+                {renderAccordionItem('sec-filing', 'Latest SEC filing', secFiling, () => (
                     <div className="overflow-y-auto">
                         {secFiling && secFiling.filing && (
                             <div className="p-4 border border-gray-200 rounded-md flex justify-between gap-4 align-start">
-                                <div>
-                                    <h3 className="font-semibold">SEC Filing for {symbol} - {secFiling.filing.form}</h3>
-                                    <p>Accepted on: {secFiling.filing.acceptedDate}</p>
-                                    <p>Filed on: {secFiling.filing.filedDate}</p>
+                                <div className="flex gap-4">
+                                    <Image
+                                        unoptimized
+                                        src={`https://www.google.com/s2/favicons?domain=https://www.sec.gov/&sz=32`}
+                                        alt="sec filing k-10"
+                                        width={32}
+                                        height={32}
+                                        className="object-contain p-0.5"
+                                    />
+                                    <div>
+                                        <h3 className="font-semibold">SEC Filing for {symbol} - {secFiling.filing.form}</h3>
+                                        <p className="text-gray-500">Accepted on: {secFiling.filing.acceptedDate}</p>
+                                        <p className="text-gray-500">Filed on: {secFiling.filing.filedDate}</p>
+                                    </div>
                                 </div>
                                 <div>
                                     <Button asChild variant="outline">
@@ -117,13 +113,24 @@ export function RetrievedFiles({ symbol }: RetrievedFilesProps) {
                     </div>
                 ))}
 
-                {renderAccordionItem('company-news', 'Latest news', companyNews, errors.companyNews, () => (
+                {renderAccordionItem('company-news', 'Latest news', companyNews, () => (
                     <div className="overflow-y-auto space-y-4">
                         {companyNews && companyNews.news && companyNews.news.map((news, index) => (
                             <div key={index} className="p-4 border border-gray-200 rounded-md flex justify-between gap-4 align-start">
-                                <div>
-                                    <h3 className="font-semibold">{news.headline}</h3>
-                                    <p>{news.source} | {formatUglyDate(news.date)}</p>
+                                <div className="flex gap-6">
+                                    <Image
+                                        unoptimized
+                                        src={`https://www.google.com/s2/favicons?domain=${news.url}&sz=32`}
+                                        alt={news.url}
+                                        width={28}
+                                        height={28}
+                                        className="object-contain p-0.5"
+                                    />
+                                    <div>
+                                        <h3 className="font-semibold">{news.headline}</h3>
+                                        <p className="italic text-gray-500">{news.summary}</p>
+                                        <p className="text-xs text-gray-400 mt-1">{formatUglyDate(news.date)}</p>
+                                    </div>
                                 </div>
                                 <div>
                                     <Button asChild variant="outline">
@@ -141,9 +148,7 @@ export function RetrievedFiles({ symbol }: RetrievedFilesProps) {
     )
 }
 
-function renderAccordionItem(value: string, title: string, data: any, error: string | undefined, content: () => JSX.Element) {
-    if (error) return
-
+function renderAccordionItem(value: string, title: string, data: any, content: () => JSX.Element) {
     return (
         <AccordionItem value={value}>
             <AccordionTrigger>

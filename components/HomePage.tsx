@@ -1,5 +1,6 @@
 "use client"
 import { useState, useEffect } from "react";
+import { ArrowLeft } from "lucide-react";
 import { Messages } from "@/components/Messages";
 import { SearchBar } from "@/components/SearchBar";
 import { RetrievedFiles } from "@/components/RetrievedFiles";
@@ -8,7 +9,6 @@ import { ChatProvider } from "@/context/ChatProvider";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
 
 const HomePage = () => {
     const [selectedSymbol, setSelectedSymbol] = useState<string>("");
