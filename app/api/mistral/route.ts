@@ -11,17 +11,15 @@ Formulate an investment recommendation
 Memo Structure and Content
 Create a one-page memo with these sections:
 
-Executive Summary
-Brief overview of the company
-Key financial highlights
-Main investment recommendation
-
 
 Company Overview
 Business model and main products/services
 Market position and major competitors
 Recent significant news or events
 
+Executive Summary
+Key financial highlights
+Main investment recommendation
 
 Financial Highlights
 Revenue and profit trends (last 3-5 years)
@@ -38,8 +36,7 @@ Industry trends affecting the company
 Investment Recommendation
 Clear buy, hold, or sell recommendation
 Target price (if applicable)
-Brief rationale for the recommendation
-
+Brief rationale for the recommendation 
 
 
 Guidelines
@@ -78,7 +75,7 @@ export async function POST(req: NextRequest) {
         ]
 
         const stream = await mistralClient.chatStream({
-            model: 'mistral-tiny',
+            model: 'mistral-large-latest',
             messages: mistralMessages,
         })
 
