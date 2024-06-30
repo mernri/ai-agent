@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { Messages } from "@/components/Messages";
 import { SearchBar } from "@/components/SearchBar";
@@ -17,7 +17,7 @@ const HomePage = () => {
 
     const StockSearchView = () => (
         <div className="flex flex-col items-center justify-center h-full">
-            <h1 className="text-4xl font-bold mb-6">Investment memo Generator</h1>
+            <h1 className="text-3xl font-bold mb-6">Investment memo generator</h1>
             <p className="text-xl mb-8 text-center">
                 Select a stock symbol to start analyzing and discussing financial data.
             </p>

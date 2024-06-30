@@ -61,8 +61,8 @@ class SecApiUtils:
             
         section_text = self.sec_api_extractor.get_section(sec_report_dict['reportUrl'], section, "text")
     
-        path_sec_filling_section = path_constructor(ticker_symbol, f"sec_filing_section_{section}", 'txt')
-        save_sec_filing_section(section_text, save_path=path_sec_filling_section)
+        # path_sec_filling_section = path_constructor(ticker_symbol, f"sec_filing_section_{section}", 'txt')
+        # save_sec_filing_section(section_text, save_path=path_sec_filling_section)
         
         return section_text
 

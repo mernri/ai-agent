@@ -125,8 +125,6 @@ export async function fetchCompanyNews(symbol: string, start_date?: string, end_
     }
 
     const data: CompanyNewsResponse = await response.json();
-
-    console.log("COMPANY NEWS = ", data)
     return data;
 }
 
