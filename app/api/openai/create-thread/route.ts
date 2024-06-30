@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
 
         const client = initOpenaiClient();
 
-        const thread = await client.beta.threads.create({ messages, metadata, tool_resources });
+        const thread = await client.beta.threads.create({ messages, tool_resources, metadata });
 
         return NextResponse.json(thread, { status: 200 });
     } catch (error) {

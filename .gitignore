@@ -34,6 +34,7 @@ __pycache__/
 
 # saved filed 
 api/outputs
+/outputs
 
 # vercel
 .vercel

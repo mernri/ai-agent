@@ -27,7 +27,7 @@ const ChatContext = createContext<ChatContextType>({
 });
 
 // Step 2 : Create the context wrapper (the provider)
-export function ChatProvider({ children }: { children: React.ReactNode }) {
+export function ChatProvider({ children, selectedSymbol }: { children: React.ReactNode, selectedSymbol: string }) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [threadId, setThreadId] = useState<string>('');
 
@@ -60,6 +60,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
                 content: content,
                 role: 'user'
             });
+
 
             // STREAM THE ASSISTANT RESPONSE
             const stream = await runAndStream({

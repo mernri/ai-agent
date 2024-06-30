@@ -64,4 +64,4 @@ def path_constructor(symbol: str, output: str, extension: str) -> str:
     """
     Construct the path for the given ouput and thicker symbol.
     """
-    return f"../outputs/{symbol}/{output}.{extension}"
+    return f"../../outputs/{symbol}/{output}.{extension}"

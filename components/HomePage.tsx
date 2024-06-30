@@ -38,7 +38,7 @@ const HomePage = () => {
     );
 
     const StockAnalysisView = () => (
-        <ChatProvider>
+        <ChatProvider selectedSymbol={selectedSymbol}>
             <div className="flex flex-col h-full">
                 <div className="flex-none mb-4 flex items-center">
                     <Button

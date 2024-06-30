@@ -1,4 +1,38 @@
 import OpenAI from "openai";
+import path from 'path';
+
+async function createVectorStore(directoryPath: string) {
+    try {
+        const response = await fetch('/api/openai/create-vector-store', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ directoryPath }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log('Vector store created:', result);
+        return result.vectorStoreId;
+    } catch (error) {
+        console.error('Error calling createVectorStore API:', error);
+        return null;
+    }
+}
+
+export async function createVectorStoreForSymbol(symbol: string): Promise<string | null> {
+    const projectRoot = process.cwd();
+    console.log('\nProject root:', projectRoot)
+    const symbolDir = path.resolve('.', 'outputs', symbol);
+    console.log('\nSymbol directory:', symbolDir)
+
+    return await createVectorStore(symbolDir);
+}
+
 
 export const createAssistant = async (params: OpenAI.Beta.AssistantCreateParams): Promise<OpenAI.Beta.Assistant | null> => {
     try {
@@ -112,6 +146,28 @@ export const addMessageToThread = async (params: {
         return null;
     }
 };
+
+export const modifyThread = async (threadId: string, tool_resources: {}) => {
+    try {
+        const response = await fetch('/api/openai/modify-thread', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ threadId, tool_resources }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Thread modified successfully:', data);
+        return data;
+    } catch (error) {
+        console.error(`\n❌ Failed to modify the thread: ${error}`);
+    }
+}
 
 
 export const runAndStream = async (params: {

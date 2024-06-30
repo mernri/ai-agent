@@ -78,6 +78,7 @@ export const createThread = async ({
     }
 };
 
+
 export const retrieveAssistant = async (assistant_id: string) => {
     const client = getOpenaiClient();
     try {

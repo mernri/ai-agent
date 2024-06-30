@@ -2,10 +2,8 @@ import React, { useState, useEffect } from "react"
 import { CustomTable } from "@/components/ui/custom-table"
 import { formatUglyDate } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/20/solid"
-import { BlurIn } from "@/components/ui/text/blur-in"
+import { CheckCircleIcon } from "@heroicons/react/20/solid"
 import he from 'he';
-import { cn } from "@/lib/utils";
 
 import {
     fetchIncomeStatement,
@@ -22,6 +20,7 @@ import {
     CompanyNewsResponse,
     SecFilingResponse
 } from "@/lib/tools/tools_types"
+
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 
 interface RetrievedFilesProps {
@@ -95,25 +94,7 @@ export function RetrievedFiles({ symbol }: RetrievedFilesProps) {
                     </div>
                 ))}
 
-                {renderAccordionItem('company-news', 'Latest news', companyNews, errors.companyNews, () => (
-                    <div className="overflow-y-auto space-y-4">
-                        {companyNews && companyNews.news && companyNews.news.map((news, index) => (
-                            <div key={index} className="p-4 border border-gray-200 rounded-md flex justify-between gap-4 align-start">
-                                <div>
-                                    <h3 className="font-semibold">{news.headline}</h3>
-                                    <p>{news.source} | {formatUglyDate(news.date)}</p>
-                                </div>
-                                <div>
-                                    <Button asChild variant="outline">
-                                        <a href={news.url} target="_blank" rel="noopener noreferrer">
-                                            Read article
-                                        </a>
-                                    </Button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                ))}
+
 
                 {renderAccordionItem('sec-filing', 'Latest SEC filing', secFiling, errors.secFiling, () => (
                     <div className="overflow-y-auto">
@@ -133,6 +114,26 @@ export function RetrievedFiles({ symbol }: RetrievedFilesProps) {
                                 </div>
                             </div>
                         )}
+                    </div>
+                ))}
+
+                {renderAccordionItem('company-news', 'Latest news', companyNews, errors.companyNews, () => (
+                    <div className="overflow-y-auto space-y-4">
+                        {companyNews && companyNews.news && companyNews.news.map((news, index) => (
+                            <div key={index} className="p-4 border border-gray-200 rounded-md flex justify-between gap-4 align-start">
+                                <div>
+                                    <h3 className="font-semibold">{news.headline}</h3>
+                                    <p>{news.source} | {formatUglyDate(news.date)}</p>
+                                </div>
+                                <div>
+                                    <Button asChild variant="outline">
+                                        <a href={news.url} target="_blank" rel="noopener noreferrer">
+                                            Read article
+                                        </a>
+                                    </Button>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 ))}
             </Accordion>
