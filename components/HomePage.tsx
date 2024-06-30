@@ -1,7 +1,7 @@
 "use client"
 import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
-import { Messages } from "@/components/Messages";
+import { ChatMessages } from "@/components/ChatMessages";
 import { SearchBar } from "@/components/SearchBar";
 import { RetrievedFiles } from "@/components/RetrievedFiles";
 import { ChatInput } from "@/components/ui/chat-input";
@@ -44,21 +44,25 @@ const HomePage = () => {
                     {!isMobile ? (
                         <ResizablePanelGroup direction="horizontal" className="h-full rounded-lg border">
                             <ResizablePanel defaultSize={50} minSize={30}>
+
                                 <ScrollArea className="h-full pr-4">
-                                    <Messages />
+                                    <ChatMessages />
                                 </ScrollArea>
+
                             </ResizablePanel>
                             <ResizableHandle withHandle />
                             <ResizablePanel defaultSize={50} minSize={30}>
+
                                 <ScrollArea className="h-full pr-4">
                                     <RetrievedFiles symbol={selectedSymbol} />
                                 </ScrollArea>
+
                             </ResizablePanel>
                         </ResizablePanelGroup>
                     ) : (
                         <ScrollArea className="h-full pr-4">
-                            <Messages />
                             <RetrievedFiles symbol={selectedSymbol} />
+                            <ChatMessages />
                         </ScrollArea>
                     )}
                 </div>

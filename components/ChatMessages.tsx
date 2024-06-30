@@ -1,19 +1,12 @@
 "use client"
 import * as React from "react";
 import { useChatContext } from "@/context/ChatProvider";
+import { useScrollToBottom } from '@/hooks/useScrollToBottom';
 import he from 'he';
 
-export const Messages = () => {
+export const ChatMessages = () => {
     const { messages } = useChatContext();
-    const endOfMessagesRef = React.useRef<HTMLDivElement>(null);
-
-    React.useEffect(() => {
-        if (endOfMessagesRef.current) {
-            endOfMessagesRef.current.scrollIntoView();
-        }
-
-    }, [messages]);
-
+    const endOfMessagesRef = useScrollToBottom<HTMLDivElement>(messages);
     return (
         <div className="flex flex-col w-full justify-between h-full px-2">
             <div className="flex flex-col overflow-auto">
@@ -40,9 +33,8 @@ export const Messages = () => {
                 })}
                 <div ref={endOfMessagesRef} className="pb-6" />
             </div>
-
         </div>
     );
 };
 
-export default Messages;
+export default ChatMessages;
