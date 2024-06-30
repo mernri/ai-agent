@@ -13,13 +13,13 @@ import {
     useCompanyProfile,
     useCompanyNews,
     useSecFiling
-} from "@/hooks/useCompanyData"
+} from "@/hooks/useStockData"
 
 interface RetrievedFilesProps {
     symbol: string;
 }
 
-export function RetrievedFiles({ symbol }: RetrievedFilesProps) {
+export function StockInfo({ symbol }: RetrievedFilesProps) {
     const isMobile = useIsMobile();
 
     const { data: incomeStatement, isLoading: isLoadingIncomeStatement } = useIncomeStatement(symbol);
@@ -191,7 +191,7 @@ const NewsItem: React.FC<NewsItemProps> = ({ news, isMobile }) => (
                 alt={news.url}
                 width={28}
                 height={28}
-                className="object-contain p-0.5 self-start"
+                className="object-contain p-0.5"
             />
             <div>
                 <h3 className="font-semibold mb-2">{news.headline}</h3>

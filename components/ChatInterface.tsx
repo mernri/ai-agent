@@ -4,9 +4,10 @@ import { useChatContext } from "@/context/ChatProvider";
 import { useScrollToBottom } from '@/hooks/useScrollToBottom';
 import he from 'he';
 
-export const ChatMessages = () => {
+export const ChatInterface = () => {
     const { messages } = useChatContext();
     const endOfMessagesRef = useScrollToBottom<HTMLDivElement>(messages);
+
     return (
         <div className="flex flex-col w-full justify-between h-full px-2">
             <div className="flex flex-col overflow-auto">
@@ -29,7 +30,6 @@ export const ChatMessages = () => {
                             </div>
                         )
                     }
-
                 })}
                 <div ref={endOfMessagesRef} className="pb-6" />
             </div>
@@ -37,4 +37,4 @@ export const ChatMessages = () => {
     );
 };
 
-export default ChatMessages;
+export default ChatInterface;

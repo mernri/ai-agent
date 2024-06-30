@@ -50,3 +50,24 @@ export const useSecFiling = (symbol: string, form?: string, fromDate?: string, t
         queryFn: () => fetchSecFiling(symbol, form, fromDate, toDate),
     })
 }
+
+export const useAggregatedStockData = (symbol: string) => {
+    const incomeStatement = useIncomeStatement(symbol);
+    const basicFinancials = useBasicFinancials(symbol, ['revenueTTm', 'debtEquityTTM', 'peRatioTTM', 'pegRatioTTM', 'priceToBookTTM', 'priceToSalesTTM', 'dividendYieldTTM', 'roeTTM']);
+    const companyProfile = useCompanyProfile(symbol);
+    const companyNews = useCompanyNews(symbol);
+    const secFiling = useSecFiling(symbol, "10-K");
+
+    const isLoading = incomeStatement.isLoading || basicFinancials.isLoading || companyProfile.isLoading || companyNews.isLoading || secFiling.isLoading;
+    const isError = incomeStatement.isError || basicFinancials.isError || companyProfile.isError || companyNews.isError || secFiling.isError;
+
+    const data = {
+        incomeStatement: incomeStatement.data,
+        basicFinancials: basicFinancials.data,
+        companyProfile: companyProfile.data,
+        companyNews: companyNews.data,
+        secFiling: secFiling.data
+    };
+
+    return { data, isLoading, isError };
+};

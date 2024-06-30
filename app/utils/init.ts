@@ -1,7 +1,6 @@
-import { OpenAI } from "openai";
+import MistralClient from '@mistralai/mistralai'
 
-export const initOpenaiClient = () => {
-    const openai_api_key = process.env.OPENAI_API_KEY
-    const client = new OpenAI({ apiKey: openai_api_key, timeout: 1000, maxRetries: 3 });
+export function initMistralClient() {
+    const client = new MistralClient(process.env.MISTRAL_API_KEY);
     return client
-};
+}

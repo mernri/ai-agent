@@ -1,125 +1,91 @@
-"use client"
-import { createContext, useState, useContext } from 'react';
-import { makeId } from '@/utils/index';
-import { addMessageToThread, createThread, runAndStream } from "@/utils/api-helpers/openai"
+import React, { createContext, useContext, useState, useCallback } from 'react';
 
-interface Message {
-    content: string,
-    role: 'user' | 'assistant',
-    id: string
+type Message = {
+    role: 'user' | 'assistant' | 'system';
+    content: string;
 }
 
-interface ChatContextType {
+type ChatContextType = {
     messages: Message[];
-    setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
-    addUserMessage: (content: string) => void;
-    addAssistantMessage: (content: string) => void;
-    streamAssistantMessage: (stream: ReadableStream<Uint8Array>) => Promise<void>;
+    sendMessage: (content: string, stockData: any) => Promise<void>;
+    isLoading: boolean;
 }
 
-// Step 1 : Create the context 
-const ChatContext = createContext<ChatContextType>({
-    messages: [],
-    setMessages: () => { },
-    addUserMessage: () => { },
-    addAssistantMessage: () => { },
-    streamAssistantMessage: async () => { }
-});
+const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
-// Step 2 : Create the context wrapper (the provider)
-export function ChatProvider({ children, selectedSymbol }: { children: React.ReactNode, selectedSymbol: string }) {
+export const ChatProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
     const [messages, setMessages] = useState<Message[]>([]);
-    const [threadId, setThreadId] = useState<string>('');
+    const [isLoading, setIsLoading] = useState(false);
 
-    const assistant_id = process.env.NEXT_PUBLIC_OPENAI_ASSISTANT_ID;
+    const sendMessage = useCallback(async (content: string, stockData: any) => {
+        setIsLoading(true);
+        const userMessage: Message = { role: 'user', content };
+        setMessages(prev => [...prev, userMessage]);
 
-    const addUserMessage = async (content: string) => {
-        // ADD A NEW USER MESSAGE TO THE UI (state)
-        const newMessage: Message = {
-            content: content,
-            role: "user",
-            id: makeId("usr")
-        };
-
-        setMessages(prevMessages => [...prevMessages, newMessage]);
-
-        // CREATE A NEW THREAD IF THERE ISN'T ONE
-        let currentThreadId = threadId;
-        if (!currentThreadId) {
-            const thread = await createThread({});
-            if (thread !== null) {
-                setThreadId(thread.id);
-                currentThreadId = thread.id;
-            }
-        }
-
-        if (currentThreadId && assistant_id) {
-            // ADD THE USER MESSAGE TO THE OPENAI THREAD
-            await addMessageToThread({
-                threadId: currentThreadId,
-                content: content,
-                role: 'user'
+        try {
+            const response = await fetch('/api/mistral', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ messages: [...messages, userMessage], stockData }),
             });
 
+            if (!response.body) throw new Error('No response body');
 
-            // STREAM THE ASSISTANT RESPONSE
-            const stream = await runAndStream({
-                threadId: currentThreadId,
-                assistant_id: assistant_id,
-            });
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let assistantMessage = '';
 
-            if (stream) {
-                await streamAssistantMessage(stream);
-            }
-        } else {
-            console.error("\n Failed to create a new thread.");
-        }
-    };
+            setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
 
-    const addAssistantMessage = (content: string) => {
-        const newMessage: Message = {
-            content: content,
-            role: "assistant",
-            id: makeId("asst")
-        };
-        setMessages(prevMessages => [...prevMessages, newMessage]);
-    };
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
 
-    const streamAssistantMessage = async (stream: ReadableStream<Uint8Array>) => {
-        const reader = stream.getReader();
-        const decoder = new TextDecoder("utf-8");
-        let completeMessage = "";
+                const chunk = decoder.decode(value);
+                const lines = chunk.split('\n');
 
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            const chunk = decoder.decode(value, { stream: true });
-            completeMessage += chunk;
-            setMessages(prevMessages => {
-                const lastMessage = prevMessages[prevMessages.length - 1];
-                if (lastMessage && lastMessage.role === 'assistant') {
-                    return [...prevMessages.slice(0, -1), { ...lastMessage, content: completeMessage }];
-                } else {
-                    return [...prevMessages, { content: completeMessage, role: 'assistant', id: makeId("asst") }];
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const data = line.slice(5).trim();
+                        if (data === '[DONE]') break;
+
+                        try {
+                            const parsed = JSON.parse(data);
+                            if (parsed.content) {
+                                assistantMessage += parsed.content;
+                                setMessages(prev => [
+                                    ...prev.slice(0, -1),
+                                    { role: 'assistant', content: assistantMessage }
+                                ]);
+                            }
+                        } catch (e) {
+                            console.error('Error parsing SSE data:', e);
+                        }
+                    }
                 }
-            });
+            }
+        } catch (error) {
+            console.error('Error in Mistral chat:', error);
+            setMessages(prev => [
+                ...prev,
+                { role: 'assistant', content: 'Sorry, an error occurred while processing your request.' }
+            ]);
+        } finally {
+            setIsLoading(false);
         }
-    };
+    }, [messages]);
 
     return (
-        <ChatContext.Provider value={{
-            messages,
-            setMessages,
-            addUserMessage,
-            addAssistantMessage,
-            streamAssistantMessage
-        }}>
+        <ChatContext.Provider value={{ messages, sendMessage, isLoading }}>
             {children}
         </ChatContext.Provider>
     );
-}
+};
 
-// Step 3 : Create the custom hook I can use to access the context (the consumer)
-export function useChatContext() {
-    return useContext(ChatContext);
-}
+export const useChatContext = () => {
+    const context = useContext(ChatContext);
+    if (context === undefined) {
+        throw new Error('useChatContext must be used within a ChatProvider');
+    }
+    return context;
+};

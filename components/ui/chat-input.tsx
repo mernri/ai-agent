@@ -5,16 +5,21 @@ import { FormEvent, useState } from "react"
 import { PaperAirplaneIcon } from "@heroicons/react/20/solid"
 import { useChatContext } from "@/context/ChatProvider"
 
-export const ChatInput = () => {
-    const [inputValue, setInputValue] = useState("")
-    const { addUserMessage } = useChatContext();
+type ChatInputProps = {
+    onSendMessage: (message: string) => void;
+    isLoading: boolean;
+}
 
-    const handleSendMessage = async (e: FormEvent) => {
+export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isLoading }) => {
+    const [inputMessage, setInputMessage] = useState("")
+    const { isLoading: isChatLoading } = useChatContext()
+
+    const handleSendMessage = (e: FormEvent) => {
         e.preventDefault()
-        if (inputValue.trim() === "") return
-
-        addUserMessage(inputValue)
-        setInputValue("")
+        if (inputMessage.trim() && !isLoading && !isChatLoading) {
+            onSendMessage(inputMessage)
+            setInputMessage('')
+        }
     }
 
     return (
@@ -23,8 +28,8 @@ export const ChatInput = () => {
                 placeholder="Type your message here..."
                 className="w-full relative bg-gray-100"
                 maxHeight={200}
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
                 onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();

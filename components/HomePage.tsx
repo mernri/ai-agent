@@ -1,19 +1,22 @@
 "use client"
+
 import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
-import { ChatMessages } from "@/components/ChatMessages";
+import { ChatInterface } from "@/components/ChatInterface";
 import { SearchBar } from "@/components/SearchBar";
-import { RetrievedFiles } from "@/components/RetrievedFiles";
+import { StockInfo } from "@/components/StockInfo";
 import { ChatInput } from "@/components/ui/chat-input";
-import { ChatProvider } from "@/context/ChatProvider";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { Button } from "@/components/ui/button";
 import useIsMobile from "@/hooks/useIsMobile";
+import { useChatContext } from "@/context/ChatProvider";
+import { useAggregatedStockData } from "@/hooks/useStockData";
 
 const HomePage = () => {
     const [selectedSymbol, setSelectedSymbol] = useState<string>("");
     const isMobile = useIsMobile();
+    const { sendMessage } = useChatContext();
 
     const StockSearchView = () => (
         <div className="flex flex-col items-center justify-center h-full">
@@ -27,8 +30,19 @@ const HomePage = () => {
         </div>
     );
 
-    const StockAnalysisView = () => (
-        <ChatProvider selectedSymbol={selectedSymbol}>
+    const StockAnalysisView = () => {
+        const { data: stockData, isLoading: isLoadingStock, isError } = useAggregatedStockData(selectedSymbol);
+        const { sendMessage, isLoading: isChatLoading } = useChatContext();
+
+        if (isError) return <div>Error loading stock data</div>;
+
+        const handleSendMessage = (message: string) => {
+            if (stockData) {
+                sendMessage(message, stockData);
+            }
+        };
+
+        return (
             <div className="flex flex-col h-full">
                 <div className="flex-none mb-4 flex items-center">
                     <Button
@@ -46,7 +60,7 @@ const HomePage = () => {
                             <ResizablePanel defaultSize={50} minSize={30}>
 
                                 <ScrollArea className="h-full pr-4">
-                                    <ChatMessages />
+                                    <ChatInterface />
                                 </ScrollArea>
 
                             </ResizablePanel>
@@ -54,24 +68,26 @@ const HomePage = () => {
                             <ResizablePanel defaultSize={50} minSize={30}>
 
                                 <ScrollArea className="h-full pr-4">
-                                    <RetrievedFiles symbol={selectedSymbol} />
+                                    <StockInfo symbol={selectedSymbol} />
                                 </ScrollArea>
 
                             </ResizablePanel>
                         </ResizablePanelGroup>
                     ) : (
                         <ScrollArea className="h-full pr-4">
-                            <RetrievedFiles symbol={selectedSymbol} />
-                            <ChatMessages />
+                            <StockInfo symbol={selectedSymbol} />
+                            <ChatInterface />
                         </ScrollArea>
                     )}
                 </div>
                 <div className="flex-none mt-4">
-                    <ChatInput />
+                    <div className="flex-none mt-4">
+                        <ChatInput onSendMessage={handleSendMessage} isLoading={isLoadingStock || isChatLoading} />
+                    </div>
                 </div>
             </div>
-        </ChatProvider>
-    );
+        )
+    };
 
     return (
         <main className="flex flex-col h-screen p-4 md:p-12 bg-gray-50">
