@@ -9,21 +9,11 @@ import { ChatProvider } from "@/context/ChatProvider";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { Button } from "@/components/ui/button";
+import useIsMobile from "@/hooks/useIsMobile";
 
 const HomePage = () => {
     const [selectedSymbol, setSelectedSymbol] = useState<string>("");
-    const [isMobile, setIsMobile] = useState<boolean>(false);
-
-    useEffect(() => {
-        const checkIfMobile = () => {
-            setIsMobile(window.innerWidth < 768);
-        };
-
-        checkIfMobile();
-        window.addEventListener('resize', checkIfMobile);
-
-        return () => window.removeEventListener('resize', checkIfMobile);
-    }, []);
+    const isMobile = useIsMobile();
 
     const StockSearchView = () => (
         <div className="flex flex-col items-center justify-center h-full">
