@@ -2,9 +2,9 @@ import os
 from typing import Annotated
 from dotenv import load_dotenv
 import sys
-from utils.other import  save_sec_filing_section, path_constructor
 from sec_api import ExtractorApi
-from utils.data_sources.finnhub_utils import FinnhubUtils
+from utils.finnhub_utils import FinnhubUtils
+
 load_dotenv(".env")
 
 class SecApiUtils:
@@ -60,10 +60,7 @@ class SecApiUtils:
             sec_report_dict = finnhub.get_sec_filing(**sec_filing_params)
             
         section_text = self.sec_api_extractor.get_section(sec_report_dict['reportUrl'], section, "text")
-    
-        # path_sec_filling_section = path_constructor(ticker_symbol, f"sec_filing_section_{section}", 'txt')
-        # save_sec_filing_section(section_text, save_path=path_sec_filling_section)
-        
+            
         return section_text
 
 if __name__ == "__main__":

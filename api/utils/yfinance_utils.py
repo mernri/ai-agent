@@ -2,7 +2,6 @@ import sys
 from typing import Annotated, Any
 from pandas import DataFrame
 import pandas as pd
-from utils.other import save_output, path_constructor
 import yfinance as yf
 
 class YFinanceUtils:
@@ -19,7 +18,6 @@ class YFinanceUtils:
         income_stmt = self.yfinance_ticker.financials
         income_stmt_df = pd.DataFrame(income_stmt)
         income_stmt_dict = income_stmt_df.transpose().to_dict(orient='index')
-        # save_output(pd.DataFrame(income_stmt_dict), f"Income statement for: {self.symbol}", path_constructor(self.symbol, "income_statement", 'csv'))
         return income_stmt_dict
 
 if __name__ == "__main__":

@@ -7,7 +7,7 @@ export function useScrollToBottom<T extends HTMLElement>(
 
     useEffect(() => {
         if (ref.current) {
-            ref.current.scrollIntoView({ behavior: 'smooth' });
+            ref.current.scrollIntoView();
         }
     }, [dependency]);
 

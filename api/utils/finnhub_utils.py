@@ -7,10 +7,10 @@ from collections import defaultdict
 import finnhub
 from dotenv import load_dotenv
 import sys
-from utils.other import save_output, save_htm, today, path_constructor
+from utils.other_utils import today
 from typing import List, Optional
 
-load_dotenv("../.env")
+load_dotenv(".env")
 
 ## FINNHUB API DOCUMENTATION: https://finnhub.io/docs/api
 class FinnhubUtils:
@@ -87,8 +87,6 @@ class FinnhubUtils:
             if len(news) > max_news_num:
                 news = news[:max_news_num]
             news.sort(key=lambda x: x["date"])
-            # output_df = pd.DataFrame(news)
-            # save_output(output_df, f"company news of {symbol}", save_path=path_constructor(symbol, "company_news", "csv"))
             
             return news
 
@@ -134,7 +132,6 @@ class FinnhubUtils:
 
         financials_output = pd.DataFrame(output_dict)
         financials_output = financials_output.rename_axis(index="date")
-        # save_output(financials_output, "basic financials history", save_path=path_constructor(symbol, "financials_hist", "csv"))
 
         return financials_output
 
@@ -163,8 +160,6 @@ class FinnhubUtils:
             if selected_columns:
                 output_dict = {k: v for k, v in output_dict.items() if k in selected_columns}
             
-            # output_dict_df = pd.DataFrame(output_dict, index=[0])
-            # save_output(output_dict_df, "basic financials", save_path=path_constructor(symbol, "basic_financials", "csv"))
             
             return json.dumps(output_dict, indent=2)
 
@@ -187,7 +182,6 @@ class FinnhubUtils:
                     
         if filings:   
             latest_filing = max(filings, key=lambda x: x['filedDate'])
-            # save_htm(latest_filing['reportUrl'], 'sec filling', path_constructor(symbol, "sec_filing", "htm"))
             return latest_filing
         else:
             print("No filings found for the provided criteria.")
