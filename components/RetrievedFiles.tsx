@@ -127,7 +127,18 @@ const AccordionTitle: React.FC<{ title: string }> = ({ title }) => (
     </div>
 );
 
-const LoadingPlaceholder: React.FC = () => <div>Loading...</div>;
+const LoadingPlaceholder: React.FC = () => (
+    <div className="flex w-full flex-col gap-2">
+        <div className="h-4 w-full animate-pulse rounded-md bg-gray-300" />
+        <div className="h-4 w-full animate-pulse rounded-md bg-gray-300" />
+        <div className="h-4 w-full animate-pulse rounded-md bg-gray-300" />
+        <div className="h-4 w-full animate-pulse rounded-md bg-gray-300" />
+        <br />
+        <div className="h-4 w-full animate-pulse rounded-md bg-gray-300" />
+        <div className="h-4 w-full animate-pulse rounded-md bg-gray-300" />
+        <div className="h-4 w-full animate-pulse rounded-md bg-gray-300" />
+    </div>
+);
 
 interface SecFilingContentProps {
     filing: any;
@@ -180,10 +191,10 @@ const NewsItem: React.FC<NewsItemProps> = ({ news, isMobile }) => (
                 alt={news.url}
                 width={28}
                 height={28}
-                className="object-contain p-0.5"
+                className="object-contain p-0.5 self-start"
             />
             <div>
-                <h3 className="font-semibold">{news.headline}</h3>
+                <h3 className="font-semibold mb-2">{news.headline}</h3>
                 {!isMobile && (
                     <div>
                         <p className="italic text-gray-500">{news.summary}</p>
