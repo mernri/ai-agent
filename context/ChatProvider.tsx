@@ -13,6 +13,8 @@ type ChatContextType = {
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
+
+// TODO: Embed stock data and add RAG feature instead of sending the stock data in the messages
 export const ChatProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [isLoading, setIsLoading] = useState(false);

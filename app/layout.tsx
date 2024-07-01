@@ -1,4 +1,3 @@
-import { AppProvider } from '@/context/AppProvider'
 import { Inter } from 'next/font/google'
 import './globals.css'
 
@@ -17,9 +16,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} flex min-h-screen flex-col justify-between`} suppressHydrationWarning={true}>
-        <AppProvider>
-          {children}
-        </AppProvider>
+        {children}
       </body>
     </html>
   )
