@@ -32,16 +32,23 @@ class FinnhubUtils:
         if not profile:
             return f"\nFailed to find company profile for symbol {symbol} from finnhub!"
 
+        quote = self.finnhub_client.quote(symbol=symbol)
+        if not quote:
+            return f"\nFailed to fetch stock price for symbol {symbol} from finnhub!"
+
+        current_price = quote.get('c', 0.0)
+    
         formatted_str = (
             "{name} is a leading entity in the {finnhubIndustry} sector based in {country}. "
             "Incorporated and publicly traded since {ipo}, the company has established its reputation as "
             "one of the key players in the market. As of today, {name} has a market capitalization "
-            "of {marketCapitalization:,.2f} millions in {currency}, with {shareOutstanding:.2f} shares outstanding."
-            "\n\n{name} operates primarily in the {country}, trading under the ticker {ticker} on the {exchange}. "
+            "of {marketCapitalization:,.2f} millions in {currency}, with {shareOutstanding:.2f} shares outstanding. "
+            "The current stock price is ${current_price:,.2f}.\n\n"
+            "{name} operates primarily in the {country}, trading under the ticker {ticker} on the {exchange}. "
             "As a dominant force in the {finnhubIndustry} space, the company continues to innovate and drive "
             "progress within the industry."
-        ).format(**profile)
-    
+        ).format(current_price=current_price, **profile)
+        
         return formatted_str
 
     def get_company_news(

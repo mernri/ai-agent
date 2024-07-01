@@ -1,2 +1,13 @@
+# other libraries
+python-dotenv
+requests
+pandas
 fastapi==0.100.1
 uvicorn[standard]==0.23.2
+
+
+# financial libraries
+finnhub-python
+yfinance
+sec_api
+fmpsdk

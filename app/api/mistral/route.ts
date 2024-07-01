@@ -11,12 +11,6 @@ Formulate an investment recommendation
 Memo Structure and Content
 Create a one-page memo with these sections:
 
-
-Company Overview
-Business model and main products/services
-Market position and major competitors
-Recent significant news or events
-
 Executive Summary
 Key financial highlights
 Main investment recommendation
